@@ -13,12 +13,25 @@ struct Case_struct {
     unsigned char type[15]; // 0 -> 2 * 2 ; 1 -> 2 * 1 ; 2 -> 1 * 2 ; 3 -> 1 * 1
     unsigned long long code;
 };
-vector <vector <Case_struct *> > Layer;
-vector <vector <vector <int> > > Hash;
-vector <vector <vector <int> > > Layer_Next;
-vector <vector <vector <int> > > Layer_Source;
+vector <vector <Case_struct *> > Layer; // 储存全部层数据的节点
+vector <vector <vector <int> > > Hash; // 哈希表
+vector <vector <vector <int> > > Layer_Next; // 子节点数据
+vector <vector <vector <int> > > Layer_Source; // 父节点数据
 vector <int> int_vector;
-int layer_num, layer_index;
+int layer_num, layer_index; // layer_num: 当前扫描节点的层编号  layer_index: 当前扫描节点的层中编号
+
+// 布局的基本参数
+int min_solution_step; // 最少的步数
+int min_solution_num; // 最少步解的个数
+vector <unsigned long long> min_solution_case; // 所有最少步解
+
+vector <unsigned int> solution_step; // 所有解对应的步数
+int solution_num; // 解的个数
+vector <unsigned long long> solution_case; // 所有解
+
+int farthest_step; // 最远布局的步数
+int farthest_num; // 最远布局的个数
+vector <unsigned long long> farthest_case; // 所有最远的布局
 
 void debug(Case_struct &dat);
 unsigned long long Change_int (char str[10]);
@@ -31,46 +44,188 @@ void Find_Next_Case(Case_struct &dat_raw);
 void Add_Case(Case_struct *dat);
 void Calculate(unsigned long long code);
 void Free_Data();
+void Analyse_Case(unsigned long long code);
+void Sort(vector <unsigned long long> &dat);
 
 int main() {
     cout << "Klotski Calculator by Dnomd343" << endl;
-    cin.get();
     cout << "start" << endl;
     //Calculate(0x4FEA13400); // 0x1A9BF0C00 0x2CF519C00 0x652D7F000 0x2B1877C00
-    //Calculate(0x652D7F000);
-    // 测速
-    for (int i = 0; i < 10; i++) {
-        Calculate(0x4FEA13400);
-    }
-
-    // cout << endl << "Output:" << endl;
-    // for (int i = 0; i < Layer.size(); i++) {
-    //     cout << "Layer[" << i << "] -> " << Layer[i].size() << endl;
-    // }
-    
-    
-    // int num = 1;
-    // cout << "layer[" << num << "].size = " << Layer_Source[num].size() << endl;
-    // for (int i = 0; i < Layer_Source[num].size(); i++) {
-    //     cout << "    (" << num << "," << i << ") -> ";
-    //     for (int j = 0; j < Layer_Source[num][i].size(); j++) {
-    //         cout << "(" << num - 1 << "," << Layer_Source[num][i][j] << ") ";
-    //     }
-    //     cout << endl;
-    // }
-
-    // int num = 221;
-    // cout << "layer[" << num << "].size = " << Layer_Source[num].size() << endl;
-    // for (int i = 0; i < Layer_Next[num].size(); i++) {
-    //     cout << "    (" << num << "," << i << ") -> ";
-    //     for (int j = 0; j < Layer_Next[num][i].size(); j++) {
-    //         cout << "(" << num + 1 << "," << Layer_Next[num][i][j] << ") ";
-    //     }
-    //     cout << endl;
-    // }
+    struct Case_struct {
+        unsigned int id;
+        unsigned long long code;
+        int min_solution_step;
+        int min_solution_num;
+        vector <unsigned long long> min_solution_case;
+        vector <unsigned int> solution_step;
+        int solution_num;
+        vector <unsigned long long> solution_case;
+        int farthest_step;
+        int farthest_num;
+        vector <unsigned long long> farthest_case;
+    };
+    vector <Case_struct> Cases;
+    Case_struct empty_case;
+    char str[9];
+    int i, j;
+    File_Input.open("test.txt");
+    while (File_Input.eof() != true) {
+		File_Input >> str;
+        Cases.push_back(empty_case);
+        Cases[Cases.size() - 1].id = Cases.size() - 1;
+		Cases[Cases.size() - 1].code = Change_int(str);
+	}
+    File_Input.close();
+    for (i = 0; i < Cases.size(); i++) {
+		cout << Change_str(Cases[i].code) << "...";
+		Analyse_Case(Cases[i].code);
+		Cases[i].min_solution_step = min_solution_step;
+		Cases[i].solution_num = solution_num;
+		Cases[i].min_solution_num = min_solution_num;
+		Cases[i].solution_case = solution_case;
+		Cases[i].solution_step = solution_step;
+		Cases[i].min_solution_case = min_solution_case;
+		Cases[i].farthest_step = farthest_step;
+		Cases[i].farthest_num = farthest_num;
+		Cases[i].farthest_case = farthest_case;
+		cout << "OK -> " << i + 1 << "/" << Cases.size() << endl;
+	}
+    cout << "Output farthest.csv...";
+	File_Output.open("farthest.csv");
+	File_Output << "id,farthest_step,farthest_num,farthest_case";
+	for (i = 0; i < Cases.size(); i++) {
+		File_Output << endl;
+		File_Output << Cases[i].id << ",";
+		File_Output << Cases[i].farthest_step << ",";
+		File_Output << Cases[i].farthest_num << ",";
+		for (j = 0; j < Cases[i].farthest_case.size(); j++) {
+			File_Output << Change_str(Cases[i].farthest_case[j]);
+			if (j != Cases[i].farthest_case.size() - 1) {File_Output << "-";}
+		}
+	}
+	File_Output.close();
+	cout << "OK" << endl;
+	cout << "Output min_solution.csv...";
+	File_Output.open("min_solution.csv");
+	File_Output << "id,min_solution_step,min_solution_num,min_solution_case";
+	for (i = 0; i < Cases.size(); i++) {
+		File_Output << endl;
+		File_Output << Cases[i].id << ",";
+		File_Output << Cases[i].min_solution_step << ",";
+		File_Output << Cases[i].min_solution_num << ",";
+		for (j = 0; j < Cases[i].min_solution_case.size(); j++) {
+			File_Output << Change_str(Cases[i].min_solution_case[j]);
+			if (j != Cases[i].min_solution_case.size() - 1) {File_Output << "-";}
+		}
+	}
+	File_Output.close();
+	cout << "OK" << endl;
+	cout << "Output solution.csv...";
+	File_Output.open("solution.csv");
+	File_Output << "id,solution_num,solution_case";
+	for (i = 0; i < Cases.size(); i++) {
+		File_Output << endl;
+		File_Output << Cases[i].id << ",";
+		File_Output << Cases[i].solution_num << ",";
+		for (j = 0; j < Cases[i].solution_case.size(); j++) {
+			File_Output << Change_str(Cases[i].solution_case[j]);
+			File_Output << "(" << Cases[i].solution_step[j] << ")";
+			if (j != Cases[i].solution_case.size() - 1) {File_Output << "-";}
+		}
+	}
+	File_Output.close();
+	cout << "OK" << endl;
+	cout << "All Done!" << endl;
 
     cout << "bye..." << endl;
     return 0;
+}
+
+void Analyse_Case(unsigned long long code) { // 分析输入编码的各种参数 (输入编码必须无误)
+    vector < vector <bool> > solution_flag;
+    vector <unsigned long long> temp;
+    int i, j, k;
+    farthest_step = -1; // 初始化farthest
+    farthest_num = 0;
+	farthest_case.clear();
+    min_solution_step = -1; // 初始化min_solution
+    min_solution_num = 0;
+    min_solution_case.clear();
+	solution_num = 0; // 初始化solution
+	solution_case.clear();
+    solution_step.clear();
+    Calculate(code); // 计算分层数据
+    solution_flag.resize(Layer.size()); // 同步Layer的结构
+    for (i = 0; i < solution_flag.size(); i++) {
+        solution_flag[i].resize(Layer[i].size());
+    }
+
+    farthest_step = Layer.size() - 1; // 计算最远布局的步数
+    for (i = 0; i < Layer[farthest_step].size(); i++) { // 找到所有最远的布局
+        farthest_case.push_back((*Layer[farthest_step][i]).code);
+    }
+    farthest_num = farthest_case.size();
+	Sort(farthest_case);  //得到的结果进行排序
+
+    for (i = 0; i < Layer.size(); i++) {
+        for (j = 0; j < Layer[i].size(); j++) {
+            if (((*Layer[i][j]).code >> 32) == 0xD) { // 2 * 2块在出口位置
+                min_solution_step = i; // 找到最少步数
+                j = Layer[i].size(); // 跳出两层循环
+                i = Layer.size();
+            }
+        }
+    }
+    if (min_solution_step == -1) {return;} // 无解则退出
+    for (i = 0; i < Layer[min_solution_step].size(); i++) { // 遍历最少步所在层
+        if (((*Layer[min_solution_step][i]).code >> 32) == 0xD) { // 判断是否为解
+            min_solution_case.push_back((*Layer[min_solution_step][i]).code); // 加入最少步解序列中
+            solution_flag[min_solution_step][i] = true; // 标识
+        }
+    }
+    min_solution_num = min_solution_case.size();
+	Sort(min_solution_case); // 得到的结果进行排序
+    
+    solution_case = min_solution_case; // 同步最少步解到所有解序列中
+    for (i = 0; i < solution_case.size(); i++) { // 初始化已知部分的solution_step
+        solution_step.push_back(min_solution_step);
+    }
+    for (i = 0; i < Layer.size() - 1; i++) { // 遍历除最后一层外的所有层
+        for (j = 0; j < Layer[i].size(); j++) { // 遍历层内元素
+            if (solution_flag[i][j] == true) { // 若该元素被标识
+                for (k = 0; k < Layer_Next[i][j].size(); k++) { // 遍历其下一步
+                    solution_flag[i + 1][Layer_Next[i][j][k]] = true; // 标识
+                }
+            }
+        }
+		temp.clear();
+        for (j = 0; j < Layer[i + 1].size(); j++) { // 遍历下一层内元素
+            if (solution_flag[i + 1][j] == false) { // 得到未被标识的元素
+                if (((*Layer[i + 1][j]).code >> 32) == 0xD) { // 若为解的布局
+					temp.push_back((*Layer[i + 1][j]).code); // 先加入到temp中方便排序
+                    solution_step.push_back(i + 1);
+                    solution_flag[i + 1][j] = true; // 标识
+                }
+            }
+        }
+		Sort(temp); // 将得到的结果进行排序
+		for (k = 0; k < temp.size(); k++) { // 将temp内容加入solution_case中
+			solution_case.push_back(temp[k]);
+		}
+    }
+    solution_num = solution_case.size();
+}
+
+void Sort(vector <unsigned long long> &dat) { // 将输入的vector排序 (从小到大)
+	unsigned int i, j;
+	if (dat.size() == 0) {return;} // 空的则退出
+	for (i = 0; i < dat.size() - 1; i++) { // 冒泡排序
+		for (j = 0; j < dat.size() - 1 - i; j++) {
+			if (dat[j] >= dat[j + 1]) {
+                swap(dat[j], dat[j + 1]);
+            }
+		}
+	}
 }
 
 void Free_Data() { //释放数据
