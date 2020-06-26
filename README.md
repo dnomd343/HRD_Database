@@ -17,12 +17,12 @@
 
 ### 合法布局举例：
 
-<img src="\images\legal_1.png" alt="legal_1" style="zoom: 40%;" /><img src="\images\legal_2.png" alt="legal_2" style="zoom:40%;" /><img src="\images\legal_3.png" alt="legal_3" style="zoom:40%;" /><img src="\images\legal_4.png" alt="legal_4" style="zoom:40%;" />
+<img src="/images/legal_1.png" alt="legal_1" style="zoom: 40%;" /><img src="/images/legal_2.png" alt="legal_2" style="zoom:40%;" /><img src="/images/legal_3.png" alt="legal_3" style="zoom:40%;" /><img src="/images/legal_4.png" alt="legal_4" style="zoom:40%;" />
 
 
 ### 非法布局举例：
 
-<img src="\images\illegal_1.png" alt="illegal_1" style="zoom: 40%;" /><img src="\images\illegal_2.png" alt="illegal_2" style="zoom:40%;" /><img src="\images\illegal_3.png" alt="illegal_3" style="zoom:40%;" /><img src="\images\illegal_4.png" alt="illegal_4" style="zoom:40%;" />
+<img src="/images/illegal_1.png" alt="illegal_1" style="zoom: 40%;" /><img src="/images/illegal_2.png" alt="illegal_2" style="zoom:40%;" /><img src="/images/illegal_3.png" alt="illegal_3" style="zoom:40%;" /><img src="/images/illegal_4.png" alt="illegal_4" style="zoom:40%;" />
 
 
 ### 布局间的关系
@@ -41,11 +41,11 @@
 
 
 ### 步的举例
-<img src="\images\step_exp_1.png" alt="step_exp_1" style="zoom: 40%;" />
+<img src="/images/step_exp_1.png" alt="step_exp_1" style="zoom: 40%;" />
 
-<img src="\images\step_exp_2.png" alt="step_exp_2" style="zoom:40%;" />
+<img src="/images/step_exp_2.png" alt="step_exp_2" style="zoom:40%;" />
 
-<img src="\images\step_exp_3.png" alt="step_exp_3" style="zoom:40%;" />
+<img src="/images/step_exp_3.png" alt="step_exp_3" style="zoom:40%;" />
 
 
 ### 标准情况
@@ -62,7 +62,7 @@
 
 **位置编号**
 
-<img src="\images\address.png" alt="address" style="zoom: 40%;" />
+<img src="/images/address.png" alt="address" style="zoom: 40%;" />
 
 2 x 2棋子的左上角在棋盘中的位置编号有12种情况，对应编码分别为：0、1、2、4、5、6、8、9、A(10)、C(12)、D(13)、E(14)，将其置于编码第一位；剩余8位十六进制位储存其他棋子信息。
 
@@ -71,7 +71,7 @@
 它们对应的代号（二进制）如下：
 
 | 棋子类型 | 代号 |
-| ---- | ---- |
+| :-: | :-: |
 | 空格 | 00 |
 | 1 x 2 | 01 |
 | 2 x 1 | 10 |
@@ -80,7 +80,7 @@
 十六进制可按位转为二进制，对应关系如下：
 
 | 十六进制 | 二进制 | 十进制 |
-| ---- | ---- | ---- |
+| :-: | :-: | :-: |
 | 0 | 0000 | 0 |
 | 1 | 0001 | 1 |
 | 2 | 0010 | 2 |
@@ -104,7 +104,7 @@
 
 **例1：**
 
-<img src="\images\code_exp_1.png" alt="exp-1A9BF0C00" style="zoom: 60%;" />
+<img src="/images/code_exp_1.png" alt="exp-1A9BF0C00" style="zoom: 60%;" />
 
 <table style="text-align: center">
 	<tr>
@@ -153,11 +153,11 @@
 		<td colspan="2"><b>0</b></td>
 	</tr>
 </table>
-因此，布局编码为***1A9BF0C00***，可简写为***1A9BF0C***
+因此，布局编码为**1A9BF0C00**，可简写为**1A9BF0C**
 
 **例2：**
 
-<img src="\images\code_exp_2.png" alt="exp-4FEA13400" style="zoom: 60%;" />
+<img src="/images/code_exp_2.png" alt="exp-4FEA13400" style="zoom: 60%;" />
 
 <table style="text-align: center">
 	<tr>
@@ -206,11 +206,11 @@
 		<td colspan="2"><b>0</b></td>
 	</tr>
 </table>
-因此，布局编码为***4FEA13400***，可简写为***4FEA134***
+因此，布局编码为**4FEA13400**，可简写为**4FEA134**
 
 **例3：**
 
-<img src="\images\code_exp_3.png" alt="exp-5DC02F800" style="zoom: 60%;" />
+<img src="/images/code_exp_3.png" alt="exp-5DC02F800" style="zoom: 60%;" />
 
 <table style="text-align: center">
 	<tr>
@@ -261,4 +261,4 @@
 		<td colspan="2"><b>0</b></td>
 	</tr>
 </table>
-因此，布局编码为***5DC02F800***，可简写为***5DC02F8***
+因此，布局编码为**5DC02F800**，可简写为**5DC02F8**
