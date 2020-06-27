@@ -1,3 +1,57 @@
+## 库的调用
+
+### HRD_cal
+
+包含头文件"HRD_cal.h"，类名为HRD_cal；
+
+```c++
+#include <iostream>
+#include <vector>
+#include "HRD_cal.h"
+using namespace std;
+
+int main() {
+    cout << "Klotski fast calculator by Dnomd343" << endl;
+    vector <unsigned long long> dat;
+    HRD_cal demo;
+    
+    // 将编码转为文本(参数为unsigned long long 返回string类)
+    cout << "4FEA13400 is " << demo.Change_str(0x4FEA13400) << endl;
+    cout << "----------------" << endl;
+
+    // 将文本转为编码(参数为*char 返回unsigned long long)
+    cout << "1a9bf0c00 is " << hex << demo.Change_int("1A9BF0C00") << dec << endl;
+    cout << "----------------" << endl;
+
+    // 计算最少步数(参数为unsigned long long 返回vector类)
+    dat = demo.Calculate(0x1A9BF0c00);
+    cout << demo.Change_str(0x1A9BF0C00) << "'s solution";
+    cout << " need at least " << dat.size() - 1 << " steps" << endl;
+    for (unsigned int i = 0; i < dat.size(); i++) {
+        cout << i << ": " << demo.Change_str(dat[i]) << endl;
+    }
+    cout << "----------------" << endl;
+
+    // 计算到某一布局的最短路径(参数均为unsigned long long 分别为起始编码和目标编码 返回vector类)
+    dat = demo.Calculate(0x1A9BF0C00, 0x1ABE70C00);
+    cout << demo.Change_str(0x1A9BF0C00) << " to " << demo.Change_str(0x1ABE70C00);
+    cout << " need at least " << dat.size() - 1 << " steps" << endl;
+    for (unsigned int i = 0; i < dat.size(); i++) {
+        cout << i << ": " << demo.Change_str(dat[i]) << endl;
+    }
+    cout << "----------------" << endl;
+
+    // 计算某一布局衍生出的所有布局
+    dat = demo.Calculate_All(0x1A9BF0C00);
+    cout << demo.Change_str(0x1A9BF0C00) << " can derive " << dat.size() << " cases" << endl;
+    cout << "----------------" << endl;
+
+    return 0;
+}
+```
+
+
+
 ## 基本定义
 
 ### 华容道布局
