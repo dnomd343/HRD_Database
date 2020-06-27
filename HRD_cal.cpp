@@ -71,7 +71,6 @@ void HRD_cal::init_data() { // 初始化数据结构
         List_hash[i].clear();
     }
     List.clear();
-    List_step_num.clear();
     List_source.clear();
 }
 
@@ -80,8 +79,7 @@ void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标 （输入编�
     Parse_Code(*start, Code); // 解译输入编码
     List.push_back(start); // 加入根节点
     List_source.push_back(0);
-    List_step_num.push_back(0);
-    List_hash[0xffff & ((*start).code >> 16)].push_back(0);
+    List_hash[0xffff & ((*start).code >> 16)].push_back(start);
     now_move = 0; // 设置起始搜索节点编号为0
     result = 0;
     flag = false; // 设置为暂未找到
@@ -97,13 +95,11 @@ void HRD_cal::Add_Case(Case_cal *dat) { // 将找到的布局加入队列中
     unsigned int i, x, y;
     int hash_index = 0xffff & ((*dat).code >> 16); // 取得哈希索引
     for (i = 0; i < List_hash[hash_index].size(); i++) { // 遍历索引内容
-        if ((*List[List_hash[hash_index][i]]).code == (*dat).code) { // 发现重复
-            if (List_step_num[List_hash[hash_index][i]] == List_step_num[now_move] + 1) { // 若找到的目标比多现在一步
-                for (x = 0; x < 4; x++) { // 遍历freeze表
-                    for (y = 0; y < 5; y++) {
-                        if ((*dat).freeze[x][y] == true) { // 将输入表合并到原先的表上
-                            (*List[List_hash[hash_index][i]]).freeze[x][y] = true;
-                        }
+        if ((*List_hash[hash_index][i]).code == (*dat).code) { // 发现重复
+            for (x = 0; x < 4; x++) { // 遍历freeze表
+                for (y = 0; y < 5; y++) {
+                    if ((*dat).freeze[x][y] == true) { // 将输入表合并到原先的表上
+                        (*List_hash[hash_index][i]).freeze[x][y] = true;
                     }
                 }
             }
@@ -111,10 +107,9 @@ void HRD_cal::Add_Case(Case_cal *dat) { // 将找到的布局加入队列中
             return; // 退出
         }
     }
-    List_hash[hash_index].push_back(List.size()); // 加入哈希索引
     List.push_back(dat); // 加入到队列中
     List_source.push_back(now_move); // 记录溯源信息
-    List_step_num.push_back(List_step_num[now_move] + 1); // 记录最少步数信息
+    List_hash[hash_index].push_back(dat); // 加入哈希索引
     if (mode == 1) { // 寻解模式
         if ((0xF & ((*dat).code >> 32)) == 0xD) { // 2 * 2块在出口位置
             flag = true; // 标志已找到目标

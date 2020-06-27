@@ -21,9 +21,8 @@ class HRD_cal {
             unsigned long long code;
         };
         vector <Case_cal *> List; // 主队列 储存每个节点的信息
+        vector <Case_cal *> List_hash[0x10000]; // 哈希表
         vector <unsigned int> List_source; // 储存上一步编号 用于溯源
-        vector <unsigned int> List_step_num; // 记录到根节点的最少步数
-        vector <unsigned int> List_hash[0x10000]; // 哈希表
         unsigned int now_move; // 当前正在计算的块的编号
         unsigned int result; // 得到的目标编号
         unsigned long long target_code;
