@@ -20,14 +20,15 @@ class HRD_cal {
             unsigned char type[15]; // 0 -> 2 * 2 ; 1 -> 2 * 1 ; 2 -> 1 * 2 ; 3 -> 1 * 1
             unsigned long long code;
         };
-        vector <Case_cal *> List; // Ö÷¶ÓÁĞ ´¢´æÃ¿¸ö½ÚµãµÄĞÅÏ¢
-        vector <unsigned int> List_source; // ´¢´æÉÏÒ»²½±àºÅ ÓÃÓÚËİÔ´
-        vector <unsigned long long> List_hash[0x10000]; // ¹şÏ£±í
-        unsigned int now_move; // µ±Ç°ÕıÔÚ¼ÆËãµÄ¿éµÄ±àºÅ
-        unsigned int result; // µÃµ½µÄÄ¿±ê±àºÅ
+        vector <Case_cal *> List; // ä¸»é˜Ÿåˆ— å‚¨å­˜æ¯ä¸ªèŠ‚ç‚¹çš„ä¿¡æ¯
+        vector <unsigned int> List_source; // å‚¨å­˜ä¸Šä¸€æ­¥ç¼–å· ç”¨äºæº¯æº
+        vector <unsigned int> List_step_num; // è®°å½•åˆ°æ ¹èŠ‚ç‚¹çš„æœ€å°‘æ­¥æ•°
+        vector <unsigned int> List_hash[0x10000]; // å“ˆå¸Œè¡¨
+        unsigned int now_move; // å½“å‰æ­£åœ¨è®¡ç®—çš„å—çš„ç¼–å·
+        unsigned int result; // å¾—åˆ°çš„ç›®æ ‡ç¼–å·
         unsigned long long target_code;
         unsigned char mode; // 0 -> Calculate_All / 1 -> Calculate_Solution / 2 -> Calculate_Target
-        bool flag; // ÅĞ¶ÏÊÇ·ñÒÑÕÒµ½Ä¿±ê
+        bool flag; // åˆ¤æ–­æ˜¯å¦å·²æ‰¾åˆ°ç›®æ ‡
 
         bool Parse_Code(Case_cal &dat, unsigned long long Code);
         void Get_Code(Case_cal &dat);
