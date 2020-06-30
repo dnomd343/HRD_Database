@@ -5,71 +5,69 @@
 #include <fstream>
 #include "HRD_analy.h"
 
-ifstream File_Input;
-ofstream File_Output;
-
 void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     unsigned int i, j, k;
+    ofstream output;
     vector <Case_cal *> case_list;
     if (quiet == false) {
-        cout << "Output into: " << File_name << " ...";
+        cout << "Output into: " << File_name << "...";
     }
-    File_Output.open(File_name);
-    File_Output << "[Min_solution_step]" << endl;
-    File_Output << min_solution_step << endl;
-    File_Output << "[Min_solution_case]" << endl;
-    File_Output << "num: " << min_solution_num << endl;
+    output.open(File_name);
+    output << "[Min_solution_step]" << endl;
+    output << min_solution_step << endl;
+    output << "[Min_solution_case]" << endl;
+    output << "num: " << min_solution_num << endl;
     for (i = 0; i < min_solution_case.size(); i++) {
-        File_Output << Change_str(min_solution_case[i]) << endl;
+        output << Change_str(min_solution_case[i]) << endl;
     }
-    File_Output << "[Farthest_step]" << endl;
-    File_Output << farthest_step << endl;
-    File_Output << "[Farthest_case]" << endl;
-    File_Output << "num: " << farthest_num << endl;
+    output << "[Farthest_step]" << endl;
+    output << farthest_step << endl;
+    output << "[Farthest_case]" << endl;
+    output << "num: " << farthest_num << endl;
     for (i = 0; i < farthest_case.size(); i++) {
-        File_Output << Change_str(farthest_case[i]) << endl;
+        output << Change_str(farthest_case[i]) << endl;
     }
-    File_Output << "[Solution]" << endl;
-    File_Output << "num: " << solution_num << endl;
+    output << "[Solution]" << endl;
+    output << "num: " << solution_num << endl;
     for (i = 0; i < solution_case.size(); i++) {
-        File_Output << Change_str(solution_case[i]) << "(" << solution_step[i] << ")" << endl;
+        output << Change_str(solution_case[i]) << "(" << solution_step[i] << ")" << endl;
     }
-    File_Output << "[Layer_Size]" << endl;
+    output << "[Layer_Size]" << endl;
     for (i = 0; i < Layer.size(); i++) {
-        File_Output << i << " -> " << Layer[i].size() << endl;
+        output << i << " -> " << Layer[i].size() << endl;
     }
-    File_Output << "[Layer]" << endl;
+    output << "[Layer]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
-            File_Output << "(" << i << "," << j << ") -> ";
-            File_Output << Change_str((*Layer[i][j]).code) << endl;
+            output << "(" << i << "," << j << ") -> ";
+            output << Change_str((*Layer[i][j]).code) << endl;
         }
     }
-    File_Output << "[Next]" << endl;
+    output << "[Next]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
             case_list = (*(*Layer[i][j]).adjacent).next_case;
-            File_Output << "(" << i << "," << j << ") ->";
+            output << "(" << i << "," << j << ") ->";
             for (k = 0; k < case_list.size(); k++) {
-                File_Output << " (" << (*case_list[k]).layer_num;
-                File_Output << "," << (*case_list[k]).layer_index << ")";
+                output << " (" << (*case_list[k]).layer_num;
+                output << "," << (*case_list[k]).layer_index << ")";
             }
-            File_Output << endl;
+            output << endl;
         }
     }
-    File_Output << "[Source]" << endl;
+    output << "[Source]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
             case_list = (*(*Layer[i][j]).adjacent).source_case;
-            File_Output << "(" << i << "," << j << ") <-";
+            output << "(" << i << "," << j << ") <-";
             for (k = 0; k < case_list.size(); k++) {
-                File_Output << " (" << (*case_list[k]).layer_num;
-                File_Output << "," << (*case_list[k]).layer_index << ")";
+                output << " (" << (*case_list[k]).layer_num;
+                output << "," << (*case_list[k]).layer_index << ")";
             }
-            File_Output << endl;
+            output << endl;
         }
     }
-    File_Output.close();
+    output.close();
     if (quiet == false) {
         cout << "done" << endl;
     }
