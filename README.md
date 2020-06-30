@@ -2,7 +2,19 @@
 
 ### HRD_cal
 
-包含头文件"HRD_cal.h"，类名为HRD_cal；
+描述：华容道快速计算库
+
++ 判断编码正确性
+
++ 对起始布局求解（仅返回搜索到的第一个最少步解的一个解法）
+
++ 找到两布局间最短路径（仅返回搜索到的第一条最短路径）
+
++ 找到起始布局衍生出的所有情况
+
+使用：包含头文件"HRD_cal.h"，类名为HRD_cal；
+
+示例：
 
 ```c++
 #include <iostream>
@@ -23,8 +35,13 @@ int main() {
     cout << "1a9bf0c00 is " << hex << demo.Change_int("1A9BF0C00") << dec << endl;
     cout << "----------------" << endl;
 
+    // 检测编码的正确性
+    if (demo.Check_Code(0x123456789) == false) {
+        cout << "Code error!" << endl;
+    }
+    
     // 计算最少步数(参数为unsigned long long 返回vector类)
-    dat = demo.Calculate(0x1A9BF0c00);
+    dat = demo.Calculate(0x1A9BF0C00);
     cout << demo.Change_str(0x1A9BF0C00) << "'s solution";
     cout << " need at least " << dat.size() - 1 << " steps" << endl;
     for (unsigned int i = 0; i < dat.size(); i++) {
@@ -50,6 +67,110 @@ int main() {
 }
 ```
 
+### HRD_analy
+
+描述：华容道分析库
+
++ 编码解析为具体排列
+
++ 检查编码是否合法
+
++ 根据起始布局分析出层级结构，包括各层间的链接关系
+
++ 得到布局的具体参数，包括全部最远布局、全部最少步解、全部合法解及其步数
+
++ 将分析结果导出到文件
+
+使用：包含头文件"HRD_analy.h"，类名为HRD_analy；
+
+示例：
+
+```c++
+#include <iostream>
+#include "HRD_analy.h"
+using namespace std;
+
+int main() {
+    cout << "Klotski Analyser by Dnomd343" << endl;
+    HRD_analy demo;
+
+    // 解译编码
+    demo.Parse_Code(0x1A9BF0C00);
+    cout << "code: " << demo.Change_str(demo.Parse_dat.code) << endl;
+    cout << "status" << endl;
+    for (int y = 0; y < 5; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (demo.Parse_dat.status[x][y] <= 9) { // 0 ~ 9
+                cout << int(demo.Parse_dat.status[x][y]) << " ";
+            } else if (demo.Parse_dat.status[x][y] <= 0xE) { // A ~ E
+                cout << char(demo.Parse_dat.status[x][y] + 55) << " ";
+            } else if (demo.Parse_dat.status[x][y] == 0xFE) { // space
+                cout << ". ";
+            } else if (demo.Parse_dat.status[x][y] == 0xFF) { // undefined
+                cout << "* ";
+            } else { // error
+                cout << "! ";
+            }
+        }
+        cout << endl;
+    }
+    cout << "type" << endl;
+    for (int i = 0; i < 15; i++) {
+        if (i < 10) {
+            cout << i;
+        } else {
+            cout << char(i + 55);
+        }
+        cout << " -> ";
+        switch (demo.Parse_dat.type[i]) {
+            case 0:
+                cout << "2 * 2" << endl;
+                break;
+            case 1:
+                cout << "2 * 1" << endl;
+                break;
+            case 2:
+                cout << "1 * 2" << endl;
+                break;
+            case 3:
+                cout << "1 * 1" << endl;
+                break;
+            default:
+                cout << "undefined" << endl;
+                break;
+        }
+    }
+    cout << "---------------------------" << endl;
+
+    // 分析布局
+    demo.quiet = false; // 输出分析状态
+    demo.Analyse_Case(0x1A9BF0C00);
+    demo.Output_Detail("demo-1A9BF0C00.txt"); // 输出分析结果到文件
+    cout << "---------------------------" << endl;
+
+    // 查看某布局的前后情况
+    int layer_num = 29, layer_index = 190;
+    // 得到全部父节点
+    for (int k = 0; k < (*(*demo.Layer[layer_num][layer_index]).adjacent).source_case.size(); k++) {
+        cout << " (" << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).source_case[k]).layer_num;
+        cout << "," << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).source_case[k]).layer_index << "):";
+        cout << demo.Change_str((*(*(*demo.Layer[layer_num][layer_index]).adjacent).source_case[k]).code);
+    }
+    cout << " ->";
+    cout << " (" << layer_num << "," << layer_index << "):" << demo.Change_str((*demo.Layer[layer_num][layer_index]).code);
+    cout << " ->";
+    // 得到全部子节点
+    for (int k = 0; k < (*(*demo.Layer[layer_num][layer_index]).adjacent).next_case.size(); k++) {
+        cout << " (" << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).next_case[k]).layer_num;
+        cout << "," << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).next_case[k]).layer_index << "):";
+        cout << demo.Change_str((*(*(*demo.Layer[layer_num][layer_index]).adjacent).next_case[k]).code);
+    }
+    cout << endl;
+    cout << "---------------------------" << endl;
+    
+    return 0;
+}
+```
 
 
 ## 基本定义
