@@ -75,7 +75,7 @@ void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     }
 }
 
-void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的各种参数 (输入编码必须无误)
+void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的各种参数
     vector < vector <bool> > solution_flag;
     vector <unsigned long long> temp;
     unsigned int i, j, k;
@@ -88,6 +88,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
 	solution_num = 0; // 初始化solution
 	solution_case.clear();
     solution_step.clear();
+    if (Check_Code(code) == false) {return;} // 若编码错误则退出
     Calculate(code); // 计算分层数据
     solution_flag.resize(Layer.size()); // 同步Layer的结构
     for (i = 0; i < solution_flag.size(); i++) {
@@ -130,7 +131,6 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
             if (solution_flag[i][j] == true) { // 若该元素被标识
                 case_list = (*(*Layer[i][j]).adjacent).next_case;
                 for (k = 0; k < case_list.size(); k++) { // 遍历其下一步
-                    //solution_flag[i + 1][Layer_Next[i][j][k]] = true;
                     solution_flag[i + 1][(*case_list[k]).layer_index] = true; // 标识
                 }
             }
@@ -193,7 +193,11 @@ void HRD_analy::Calculate(unsigned long long code) {
     Free_Data(); // 初始化数据结构
     Case_cal *start = new Case_cal;
     (*start).adjacent = new Case_near;
-    Parse_Code(*start, code); // 解译输入编码
+    if (Parse_Code(*start, code) == false) { // 若输入编码错误 退出
+        delete (*start).adjacent;
+        delete start;
+        return;
+    }
     Layer.resize(1); // 创建第0层
     Layer[0].push_back(start); // 加入根节点
     (*start).layer_num = (*start).layer_index = 0; // 初始化根节点编号
@@ -432,6 +436,11 @@ void HRD_analy::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5
     Find_Sub_Case(dat, num, x, y, addr); // 递归搜索
 }
 
+bool HRD_analy::Check_Code(unsigned long long code) {
+    Case_cal dat;
+    return Parse_Code(dat, code);
+}
+
 void HRD_analy::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code 输入数据必须无误
     bool temp[4][5]; // 用于临时标记
     int x, y, num;
@@ -477,6 +486,11 @@ void HRD_analy::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code �
     }
     dat.code <<= (16 - num) * 2; // 左移使编码占满低36位
     dat.code &= 0xFFFFFFFFF; // 清除高28位内容
+}
+
+bool HRD_analy::Parse_Code(unsigned long long Code) {
+    Parse_dat.layer_num = Parse_dat.layer_index = 0;
+    return Parse_Code(Parse_dat, Code);
 }
 
 bool HRD_analy::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回false表示编码有误

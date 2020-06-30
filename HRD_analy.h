@@ -21,29 +21,31 @@ class HRD_analy {
             vector <Case_cal *> source_case;
             vector <Case_cal *> next_case;
         };
-        vector <vector <Case_cal *> > Layer; // ´¢´æÈ«²¿²ãÊı¾İµÄ½Úµã
-        bool quiet = false; // true -> ¾²Ä¬Ä£Ê½  false -> Êä³öÔËËãÇé¿ö
-        // ²¼¾ÖµÄ»ù±¾²ÎÊı
-        int min_solution_step; // ×îÉÙµÄ²½Êı
-        int min_solution_num; // ×îÉÙ²½½âµÄ¸öÊı
-        vector <unsigned long long> min_solution_case; // ËùÓĞ×îÉÙ²½½â
-        vector <unsigned int> solution_step; // ËùÓĞ½â¶ÔÓ¦µÄ²½Êı
-        int solution_num; // ½âµÄ¸öÊı
-        vector <unsigned long long> solution_case; // ËùÓĞ½â
-        int farthest_step; // ×îÔ¶²¼¾ÖµÄ²½Êı
-        int farthest_num; // ×îÔ¶²¼¾ÖµÄ¸öÊı
-        vector <unsigned long long> farthest_case; // ËùÓĞ×îÔ¶µÄ²¼¾Ö
+        vector <vector <Case_cal *> > Layer; // å‚¨å­˜å…¨éƒ¨å±‚æ•°æ®çš„èŠ‚ç‚¹
+        Case_cal Parse_dat;
+        bool quiet = false; // true -> é™é»˜æ¨¡å¼  false -> è¾“å‡ºè¿ç®—æƒ…å†µ
+        // å¸ƒå±€çš„åŸºæœ¬å‚æ•°
+        int min_solution_step; // æœ€å°‘çš„æ­¥æ•°
+        int min_solution_num; // æœ€å°‘æ­¥è§£çš„ä¸ªæ•°
+        vector <unsigned long long> min_solution_case; // æ‰€æœ‰æœ€å°‘æ­¥è§£
+        vector <unsigned int> solution_step; // æ‰€æœ‰è§£å¯¹åº”çš„æ­¥æ•°
+        int solution_num; // è§£çš„ä¸ªæ•°
+        vector <unsigned long long> solution_case; // æ‰€æœ‰è§£
+        int farthest_step; // æœ€è¿œå¸ƒå±€çš„æ­¥æ•°
+        int farthest_num; // æœ€è¿œå¸ƒå±€çš„ä¸ªæ•°
+        vector <unsigned long long> farthest_case; // æ‰€æœ‰æœ€è¿œçš„å¸ƒå±€
 
         unsigned long long Change_int (char str[10]);
         string Change_str(unsigned long long dat);
+        bool Check_Code(unsigned long long code);
+        bool Parse_Code(unsigned long long Code);
         void Analyse_Case(unsigned long long code);
         void Output_Detail(string File_name);
 
     private:
-        vector <Case_cal *> Layer_hash[0x10000]; // ¹şÏ£±í
+        vector <Case_cal *> Layer_hash[0x10000]; // å“ˆå¸Œè¡¨
         Case_cal *now_move_case;
-        unsigned int now_move_num, now_move_index; // µ±Ç°É¨Ãè½ÚµãµÄ²ã±àºÅ / µ±Ç°É¨Ãè½ÚµãµÄ²ãÖĞ±àºÅ
-
+        unsigned int now_move_num, now_move_index; // å½“å‰æ‰«æèŠ‚ç‚¹çš„å±‚ç¼–å· / å½“å‰æ‰«æèŠ‚ç‚¹çš„å±‚ä¸­ç¼–å·
         bool Parse_Code(Case_cal &dat, unsigned long long Code);
         void Get_Code(Case_cal &dat);
         void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
