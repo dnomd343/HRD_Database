@@ -1,4 +1,3 @@
-#include <iostream>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -6,10 +5,13 @@
 
 vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { // 寻找整个群的全部元素
     unsigned int i;
+    vector <unsigned long long> data;
     init_data(); // 初始化
     mode = 0; // 设置模式为全集计算
+    if (Check_Code(Code) == false) { // 编码错误
+        return data; // 返回空序列
+    }
     cal(Code); // 进行广搜
-    vector <unsigned long long> data;
     for (i = 0; i < List.size(); i++) {
         data.push_back((*List[i]).code); // 储存计算结果
     }
@@ -18,6 +20,9 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
 
 vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned long long target) { // 寻找到target的最短路径
     vector <unsigned long long> temp;
+    if (Check_Code(Code) == false || Check_Code(target) == false) { // 编码错误
+        return temp; // 返回空序列
+    }
     if (Code == target) { // 若输入为target
         temp.push_back(Code);
         return temp;
@@ -35,6 +40,9 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned
 
 vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻找最少步解
     vector <unsigned long long> temp;
+    if (Check_Code(Code) == false) { // 编码错误
+        return temp; // 返回空序列
+    }
     if ((Code >> 32) == 0xD) { // 若输入已经为解
         temp.push_back(Code);
         return temp;
@@ -74,15 +82,23 @@ void HRD_cal::init_data() { // 初始化数据结构
     List_source.clear();
 }
 
-void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标 （输入编码不能出错）
+bool HRD_cal::Check_Code(unsigned long long Code) {
+    Case_cal dat;
+    return Parse_Code(dat, Code);
+}
+
+void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标
     Case_cal *start = new Case_cal;
-    Parse_Code(*start, Code); // 解译输入编码
-    List.push_back(start); // 加入根节点
-    List_source.push_back(0);
-    List_hash[0xffff & ((*start).code >> 16)].push_back(start);
     now_move = 0; // 设置起始搜索节点编号为0
     result = 0;
     flag = false; // 设置为暂未找到
+    if (Parse_Code(*start, Code) == false) { // 若输入编码错误 退出
+        delete start;
+        return;
+    }
+    List.push_back(start); // 加入根节点
+    List_source.push_back(0);
+    List_hash[0xffff & ((*start).code >> 16)].push_back(start);
     while (1 == 1) { // 创建死循环
         Find_Next_Case(*List[now_move]);
         if (flag == true) {break;} // 若找到则退出
@@ -96,6 +112,7 @@ void HRD_cal::Add_Case(Case_cal *dat) { // 将找到的布局加入队列中
     int hash_index = 0xffff & ((*dat).code >> 16); // 取得哈希索引
     for (i = 0; i < List_hash[hash_index].size(); i++) { // 遍历索引内容
         if ((*List_hash[hash_index][i]).code == (*dat).code) { // 发现重复
+            // 通过freeze表合并来屏蔽不必要的移动
             for (x = 0; x < 4; x++) { // 遍历freeze表
                 for (y = 0; y < 5; y++) {
                     if ((*dat).freeze[x][y] == true) { // 将输入表合并到原先的表上
