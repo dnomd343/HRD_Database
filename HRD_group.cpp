@@ -4,64 +4,12 @@
 #include <algorithm>
 #include <fstream>
 #include "HRD_cal.h"
-using namespace std;
+#include "HRD_group.h"
 
 ofstream output_farthest;
 ofstream output_solution;
 
-struct Case_cal {
-    unsigned long long code;
-    unsigned char status[4][5]; // 0xFF -> undefined ; 0xFE -> space
-    unsigned char type[15]; // 0 -> 2 * 2 ; 1 -> 2 * 1 ; 2 -> 1 * 2 ; 3 -> 1 * 1
-};
-struct Case {
-    unsigned long long Code;
-    int Layer_num;
-    bool Flag;
-    unsigned int addr_2x2;
-    vector <Case *> Next;
-};
-struct Case_detail {
-    unsigned long long code;
-    int farthest_step;
-    int farthest_num;
-    vector <unsigned long long> farthest_case;
-
-    int min_solution_step;
-    int min_solution_num;
-    vector <unsigned long long> min_solution_case;
-
-    int solution_num;
-    vector <unsigned long long> solution_case;
-    vector <unsigned long long> solution_step;
-};
-
-vector <unsigned long long> Next_Case_dat; // 储存Find_Next_Case找到的结果
-string File_name_farthest;
-string File_name_solution;
-bool Output_solution_case;
-
-unsigned long long Change_int(char str[10]);
-string Change_str(unsigned long long dat);
-bool Parse_Code(Case_cal &dat, unsigned long long Code);
-void Get_Code(Case_cal &dat);
-void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
-void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
-vector <unsigned long long> Find_Next_Case(unsigned long long Code);
-void Case_detail_init(Case_detail &dat);
-Case_detail* Analyse_Case(Case *start);
-void Analyse_Group(vector <unsigned long long> dat);
-void Output_detail(Case_detail *dat);
-void Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution);
-
-int main() {
-    cout << "HRD batch analyser by Dnomd343" << endl;
-    Batch_Analyse(0x1A9BF0C00, "farthest.csv", "solution.csv", false);
-    cout << "bye..." << endl;
-    return 0;
-}
-
-void Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution) {
+void HRD_group::Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution) {
     HRD_cal cal;
     vector <unsigned long long> dat;
     if (cal.Check_Code(seed) == false) {return;}
@@ -73,7 +21,7 @@ void Batch_Analyse(unsigned long long seed, string name_farthest, string name_so
     Analyse_Group(dat);
 }
 
-void Analyse_Group(vector <unsigned long long> dat) { // 传入整个群 并将结果以csv格式输出到文件
+void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个群 并将结果以csv格式输出到文件
     unsigned int i, j, k;
     int hash_index;
     vector <Case *> List; // 全组数据
@@ -125,7 +73,7 @@ void Analyse_Group(vector <unsigned long long> dat) { // 传入整个群 并将�
     }
 }
 
-void Output_detail(Case_detail *dat) {
+void HRD_group::Output_detail(Case_detail *dat) {
     unsigned int i;
     // farthest
     output_farthest << Change_str((*dat).code) << ",";
@@ -164,7 +112,7 @@ void Output_detail(Case_detail *dat) {
     output_solution << endl;
 }
 
-Case_detail* Analyse_Case(Case *start) { // 根据关系网计算布局的参数
+HRD_group::Case_detail* HRD_group::Analyse_Case(Case *start) { // 根据关系网计算布局的参数
     unsigned int i, k;
     vector <Case *> Case_Stack;
     Case_detail *dat = new Case_detail; // dat储存分析结果
@@ -232,7 +180,7 @@ Case_detail* Analyse_Case(Case *start) { // 根据关系网计算布局的参数
     return dat;
 }
 
-void Case_detail_init(Case_detail &dat) { // 初始化数据
+void HRD_group::Case_detail_init(Case_detail &dat) { // 初始化数据
     dat.farthest_step = -1;
     dat.farthest_num = 0;
     dat.farthest_case.clear();
@@ -244,7 +192,7 @@ void Case_detail_init(Case_detail &dat) { // 初始化数据
     dat.solution_step.clear();
 }
 
-vector <unsigned long long> Find_Next_Case(unsigned long long Code) { // 找到下一步移动的情况(一步可以为同一块多次移动)
+vector <unsigned long long> HRD_group::Find_Next_Case(unsigned long long Code) { // 找到下一步移动的情况(一步可以为同一块多次移动)
     int num, x, y, i, j;
     bool addr[4][5]; // 在Find_Sub_Case深搜中用于剪枝
     bool exclude[4][5]; // 排除已搜索过的块
@@ -300,7 +248,7 @@ vector <unsigned long long> Find_Next_Case(unsigned long long Code) { // 找到�
     return Next_Case_dat;
 }
 
-void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 找到下一个单格移动的情况
+void HRD_group::Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 找到下一个单格移动的情况
     switch (dat.type[num]) {
         case 0: // 2 * 2
             if (y != 0) { // 不在最上面
@@ -393,7 +341,7 @@ void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 
     }
 }
 
-void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 实现移动并将结果发送到Add_Case
+void HRD_group::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 实现移动并将结果发送到Add_Case
     if (addr[x][y] == true) { // 重复
         return; // 退出
     } else {
@@ -420,7 +368,7 @@ void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 实
     Find_Sub_Case(dat, num, x, y, addr); // 递归搜索
 }
 
-void Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code 输入数据必须无误
+void HRD_group::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code 输入数据必须无误
     bool temp[4][5]; // 用于临时标记
     int x, y, num;
     dat.code = 0;
@@ -467,7 +415,7 @@ void Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code 输入数据�
     dat.code &= 0xFFFFFFFFF; // 清除高28位内容
 }
 
-bool Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回false表示编码有误
+bool HRD_group::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回false表示编码有误
     unsigned char range[16]; // dat低32位分16组
     int i, x, y, num, space_num = 0;
     dat.code = Code;
@@ -536,7 +484,7 @@ bool Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回
     return true; // 20格恰好被填满
 }
 
-string Change_str(unsigned long long dat) { // 将数字转化为文本编码
+string HRD_group::Change_str(unsigned long long dat) { // 将数字转化为文本编码
     string str;
     str.resize(9); // 修改其长度为9位
     for (int i = 8; i >= 0; i--) { // 将每一位从数值转为ASCII码
@@ -550,7 +498,7 @@ string Change_str(unsigned long long dat) { // 将数字转化为文本编码
     return str;
 }
 
-unsigned long long Change_int(char *str) { // 将文本编码转化为数字(传入9位字符串)
+unsigned long long HRD_group::Change_int(char *str) { // 将文本编码转化为数字(传入9位字符串)
     unsigned long long dat = 0;
     for (int i = 0; i < 9; i++) { // 将每一位从ASCII码转为数值
         dat <<= 4;
