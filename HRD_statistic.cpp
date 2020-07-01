@@ -5,66 +5,20 @@
 #include <fstream>
 #include "HRD_cal.h"
 #include "HRD_analy.h"
-using namespace std;
+#include "HRD_statistic.h"
 
-ifstream File_Input;
-ofstream File_Output;
-
-struct Case {
-    unsigned int id;
-    unsigned long long code;
-    unsigned char jiang_num;
-    unsigned char bing_num;
-    unsigned char style_num;
-    unsigned int group_num;
-    unsigned int group_index;
-};
-struct Case_group {
-    unsigned int id;
-    unsigned long long code;
-    unsigned int group_num;
-    unsigned int group_index;
-};
-vector <Case *> All_Case;
-
-void Find_All_Case();
-void Output();
-void Sort_All_Case();
-vector <Case_group *> Split_Group(vector <unsigned long long> dat);
-
-void Input() {
-    unsigned int num = 0;
-	char str[10];
-    HRD_analy analy;
-
-	File_Input.open("All_Case.txt");
-    while (File_Input.eof() != true) {
-        File_Input >> str;
-        Case *temp = new Case;
-        (*temp).code = analy.Change_int(str);
-        (*temp).id = num;
-        All_Case.push_back(temp);
-        num++;
-    }
-	File_Input.close();
+void HRD_statistic::Find_All_Case(string File_name) {
+    Find_All_Case();
+    Output_All_Case(File_name);
 }
 
-int main() {
-	cout << "Klotski statistician by Dnomd343" << endl;
-
-	Find_All_Case();
-    //Input();
-    //cout << "Input OK" << endl;
-
+void HRD_statistic::Make_main_table(string File_name) {
+    Find_All_Case();
     Sort_All_Case();
-
-    cout << "Output..." << endl;
-    Output();
-    cout << "bye" << endl;
-	return 0;
+    Output_main_table(File_name);
 }
 
-void Sort_All_Case() {
+void HRD_statistic::Sort_All_Case() {
     HRD_analy analy;
     unsigned int i, num;
     unsigned char jiang_num, bing_num, style_num;
@@ -94,8 +48,6 @@ void Sort_All_Case() {
             cout << i << "/" << All_Case.size() << endl;
         }
     }
-    cout << "split group..." << endl;
-
     vector <Case_group *> case_res;
     vector <unsigned int> case_index;
     vector <unsigned long long> case_code;
@@ -126,7 +78,7 @@ void Sort_All_Case() {
     }
 }
 
-vector <Case_group *> Split_Group(vector <unsigned long long> input_dat) {
+vector <HRD_statistic::Case_group *> HRD_statistic::Split_Group(vector <unsigned long long> input_dat) {
     unsigned int i, j;
     HRD_cal cal;
     list <Case_group *> case_list;
@@ -177,36 +129,46 @@ vector <Case_group *> Split_Group(vector <unsigned long long> input_dat) {
     return output_dat;
 }
 
-void Output() {
+void HRD_statistic::Output_All_Case(string File_name) {
     unsigned int i;
     HRD_cal cal;
-    File_Output.open("All_Case.txt");
+    ofstream output;
+    output.open(File_name);
     for (i = 0; i < All_Case.size(); i++) {
-        File_Output << cal.Change_str((*All_Case[i]).code);
+        output << cal.Change_str((*All_Case[i]).code);
         if (i != All_Case.size() - 1) {
-            File_Output << endl;
-        }
-    }
-    File_Output.close();
-    File_Output.open("main.csv");
-    for (i = 0; i < All_Case.size(); i++) {
-        File_Output << (*All_Case[i]).id << ",";
-        File_Output << cal.Change_str((*All_Case[i]).code) << ",";
-        File_Output << int((*All_Case[i]).jiang_num) << ",";
-        File_Output << int((*All_Case[i]).bing_num) << ",";
-        File_Output << int((*All_Case[i]).style_num) << ",";
-        File_Output << (*All_Case[i]).group_num << ",";
-        File_Output << (*All_Case[i]).group_index;
-        if (i != All_Case.size() - 1) {
-            File_Output << endl;
+            output << endl;
         }
         if (i % 100000 == 0) {
             cout << i << "/" << All_Case.size() << endl;
         }
     }
-    File_Output.close();
+    output.close();
 }
-void Find_All_Case() {
+
+void HRD_statistic::Output_main_table(string File_name) {
+    unsigned int i;
+    HRD_cal cal;
+    ofstream output;
+    output.open(File_name);
+    for (i = 0; i < All_Case.size(); i++) {
+        output << (*All_Case[i]).id << ",";
+        output << cal.Change_str((*All_Case[i]).code) << ",";
+        output << int((*All_Case[i]).jiang_num) << ",";
+        output << int((*All_Case[i]).bing_num) << ",";
+        output << int((*All_Case[i]).style_num) << ",";
+        output << (*All_Case[i]).group_num << ",";
+        output << (*All_Case[i]).group_index;
+        if (i != All_Case.size() - 1) {
+            output << endl;
+        }
+        if (i % 100000 == 0) {
+            cout << i << "/" << All_Case.size() << endl;
+        }
+    }
+    output.close();
+}
+void HRD_statistic::Find_All_Case() {
 	unsigned long long i, n, Code;
 	unsigned int num = 0;
 	HRD_cal cal;
