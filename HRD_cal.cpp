@@ -15,6 +15,7 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
     for (i = 0; i < List.size(); i++) {
         data.push_back((*List[i]).code); // 储存计算结果
     }
+    init_data();
     return data;
 }
 
@@ -34,6 +35,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned
     if (flag == true) { // 若找到目标
         return Get_Path(result);
     } else { // 未找到目标
+        init_data();
         return temp; // 返回空序列
     }
 }
@@ -53,6 +55,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻
     if (flag == true) { // 若找到解
         return Get_Path(result);
     } else { // 无解
+        init_data();
         return temp; // 返回空序列
     }
 }
@@ -67,6 +70,7 @@ vector <unsigned long long> HRD_cal::Get_Path(unsigned int result_num) { // 找�
     }
     Path.push_back((*List[0]).code); // 加入开始布局
     reverse(Path.begin(), Path.end()); // 路径倒置
+    init_data();
     return Path;
 }
 
