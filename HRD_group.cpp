@@ -52,25 +52,25 @@ void Case_detail_init(Case_detail &dat);
 Case_detail* Analyse_Case(Case *start);
 void Analyse_Group(vector <unsigned long long> dat);
 void Output_detail(Case_detail *dat);
+void Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution);
 
 int main() {
     cout << "HRD batch analyser by Dnomd343" << endl;
-    HRD_cal cal;
-    unsigned long long seed;
-    vector <unsigned long long> dat;
-    seed = 0x1A9BF0C00;
-    if (cal.Check_Code(seed) == false) {
-        return 0;
-    }
-    dat = cal.Calculate_All(seed);
-    sort(dat.begin(), dat.end());
-    File_name_farthest = "farthest.csv";
-    File_name_solution = "solution.csv";
-    Output_solution_case = true;
-
-    Analyse_Group(dat);
+    Batch_Analyse(0x1A9BF0C00, "farthest.csv", "solution.csv", false);
     cout << "bye..." << endl;
     return 0;
+}
+
+void Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution) {
+    HRD_cal cal;
+    vector <unsigned long long> dat;
+    if (cal.Check_Code(seed) == false) {return;}
+    dat = cal.Calculate_All(seed);
+    sort(dat.begin(), dat.end());
+    File_name_farthest = name_farthest;
+    File_name_solution = name_solution;
+    Output_solution_case = is_output_solution;
+    Analyse_Group(dat);
 }
 
 void Analyse_Group(vector <unsigned long long> dat) { // 传入整个群 并将结果以csv格式输出到文件
@@ -149,7 +149,10 @@ void Output_detail(Case_detail *dat) {
         }
     }
     output_solution << "," << (*dat).solution_num;
-    if (Output_solution_case == false) {return;}
+    if (Output_solution_case == false) {
+        output_solution << endl;
+        return;
+    }
     output_solution << ",";
     for (i = 0; i < (*dat).solution_case.size(); i++) {
         output_solution << Change_str((*dat).solution_case[i]);
@@ -160,33 +163,7 @@ void Output_detail(Case_detail *dat) {
     }
     output_solution << endl;
 }
-/*
-void Show_detail(Case_detail *dat) {
-    unsigned int i;
-    cout << "============================" << endl;
-    cout << "farthest_step = " << (*dat).farthest_step << endl;
-    cout << "farthest_num = " << (*dat).farthest_num << endl;
-    cout << "farthest_case: " << endl;
-    for (i = 0; i < (*dat).farthest_case.size(); i++) {
-        cout << "   " << Change_str((*dat).farthest_case[i]) << endl;
-    }
-    cout << "============================" << endl;
-    cout << "min_solution_step = " << (*dat).min_solution_step << endl;
-    cout << "min_solution_num = " << (*dat).min_solution_num << endl;
-    cout << "min_solution_case: " << endl;
-    for (i = 0; i < (*dat).min_solution_case.size(); i++) {
-        cout << "   " << Change_str((*dat).min_solution_case[i]) << endl;
-    }
-    cout << "============================" << endl;
-    cout << "solution_num = " << (*dat).solution_num << endl;
-    cout << "solution_case(solution_step): " << endl;
-    for (i = 0; i < (*dat).solution_case.size(); i++) {
-        cout << "  " << Change_str((*dat).solution_case[i]);
-        cout << "(" << (*dat).solution_step[i] << ")" << endl;
-    }
-    cout << "============================" << endl;
-}
-*/
+
 Case_detail* Analyse_Case(Case *start) { // 根据关系网计算布局的参数
     unsigned int i, k;
     vector <Case *> Case_Stack;
