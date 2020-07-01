@@ -38,7 +38,7 @@ class HRD_group {
             vector <unsigned long long> solution_case;
             vector <unsigned long long> solution_step;
         };
-        vector <unsigned long long> Next_Case_dat; // ´¢´æFind_Next_CaseÕÒµ½µÄ½á¹û
+        vector <unsigned long long> Next_Case_dat; // å‚¨å­˜Find_Next_Caseæ‰¾åˆ°çš„ç»“æžœ
         string File_name_farthest;
         string File_name_solution;
         bool Output_solution_case;

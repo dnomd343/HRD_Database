@@ -112,12 +112,12 @@ vector <HRD_statistic::Case_group *> HRD_statistic::Split_Group(vector <unsigned
     }
     if (groups.size() == 0) {return output_dat;}
     for (i = 0; i < groups.size() - 1; i++) {
-		for (j = 0; j < groups.size() - i - 1; j++) {
-			if (groups[j].size() < groups[j + 1].size()) {
-				swap(groups[j], groups[j + 1]);
-			}
-		}
-	}
+        for (j = 0; j < groups.size() - i - 1; j++) {
+            if (groups[j].size() < groups[j + 1].size()) {
+                swap(groups[j], groups[j + 1]);
+            }
+        }
+    }
     output_dat.resize(input_dat.size());
     for (i = 0; i < groups.size(); i++) {
         for (j = 0; j < groups[i].size(); j++) {
@@ -169,10 +169,10 @@ void HRD_statistic::Output_main_table(string File_name) {
     output.close();
 }
 void HRD_statistic::Find_All_Case() {
-	unsigned long long i, n, Code;
-	unsigned int num = 0;
-	HRD_cal cal;
-	All_Case.clear();
+    unsigned long long i, n, Code;
+    unsigned int num = 0;
+    HRD_cal cal;
+    All_Case.clear();
     for (n = 0; n < 0xF; n++) {
         if (n % 4 == 3) {continue;}
         for (i = 0; i <= 0xFFFFFFFF; i++) {
