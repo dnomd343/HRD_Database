@@ -1,11 +1,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <fstream>
+#include "HRD_cal.h"
 using namespace std;
 
-ifstream File_Input;
-ofstream File_Output;
+ofstream output_farthest;
+ofstream output_solution;
 
 struct Case_cal {
     unsigned long long code;
@@ -20,6 +22,7 @@ struct Case {
     vector <Case *> Next;
 };
 struct Case_detail {
+    unsigned long long code;
     int farthest_step;
     int farthest_num;
     vector <unsigned long long> farthest_case;
@@ -34,6 +37,9 @@ struct Case_detail {
 };
 
 vector <unsigned long long> Next_Case_dat; // 储存Find_Next_Case找到的结果
+string File_name_farthest;
+string File_name_solution;
+bool Output_solution_case;
 
 unsigned long long Change_int(char str[10]);
 string Change_str(unsigned long long dat);
@@ -42,33 +48,33 @@ void Get_Code(Case_cal &dat);
 void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
 void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
 vector <unsigned long long> Find_Next_Case(unsigned long long Code);
-void Sort(vector <unsigned long long> &dat);
 void Case_detail_init(Case_detail &dat);
-void Show_detail(Case_detail *dat);
 Case_detail* Analyse_Case(Case *start);
-vector <Case_detail *> Analyse_Group(vector <unsigned long long> dat);
+void Analyse_Group(vector <unsigned long long> dat);
+void Output_detail(Case_detail *dat);
 
 int main() {
-    cout << "HRD Database by Dnomd343" << endl;
+    cout << "HRD batch analyser by Dnomd343" << endl;
+    HRD_cal cal;
+    unsigned long long seed;
     vector <unsigned long long> dat;
-    char str[10];
-    File_Input.open("group_bakk.txt");
-    while (File_Input.eof() != true) {
-        File_Input >> str;
-        dat.push_back(Change_int(str));
+    seed = 0x1A9BF0C00;
+    if (cal.Check_Code(seed) == false) {
+        return 0;
     }
-    File_Input.close();
-    cout << "Press ENTER to Start...";
-    cin.get();
-    vector <Case_detail *> res;
-    res = Analyse_Group(dat);
-    Show_detail(res[0]);
+    dat = cal.Calculate_All(seed);
+    sort(dat.begin(), dat.end());
+    File_name_farthest = "farthest.csv";
+    File_name_solution = "solution.csv";
+    Output_solution_case = true;
+
+    Analyse_Group(dat);
     cout << "bye..." << endl;
     return 0;
 }
 
-vector <Case_detail *> Analyse_Group(vector <unsigned long long> dat) {
-    int i, j, k;
+void Analyse_Group(vector <unsigned long long> dat) { // 传入整个群 并将结果以csv格式输出到文件
+    unsigned int i, j, k;
     int hash_index;
     vector <Case *> List; // 全组数据
     vector <Case *> List_hash[0x10000]; // 哈希索引
@@ -97,53 +103,96 @@ vector <Case_detail *> Analyse_Group(vector <unsigned long long> dat) {
             }
         }
     }
-    vector <Case_detail *> result;
+    Case_detail *result;
+    output_farthest.open(File_name_farthest);
+    output_solution.open(File_name_solution);
     for(i = 0; i < List.size(); i++) { // 遍历整个队列
         for (k = 0; k < List.size(); k++) { // 初始化
             (*List[k]).Layer_num = -1;
             (*List[k]).Flag = false;
         }
-        result.push_back(Analyse_Case(List[i])); // 计算对应布局数据并储存到result中
+        result = Analyse_Case(List[i]); // 计算对应布局数据并储存到result中
+        Output_detail(result);
+        delete result;
         if (i % 13 == 0) {
             cout << i << "/" << List.size() << endl;
         }
     }
+    output_farthest.close();
+    output_solution.close();
     for (i = 0; i < List.size(); i++) { // 释放List数据
         delete List[i];
     }
-    return result;
 }
 
+void Output_detail(Case_detail *dat) {
+    unsigned int i;
+    // farthest
+    output_farthest << Change_str((*dat).code) << ",";
+    output_farthest << (*dat).farthest_step << ",";
+    output_farthest << (*dat).farthest_num << ",";
+    for (i = 0; i < (*dat).farthest_case.size(); i++) {
+        output_farthest << Change_str((*dat).farthest_case[i]);
+        if (i + 1 != (*dat).farthest_case.size()) {
+            output_farthest << "-";
+        }
+    }
+    output_farthest << endl;
+    // solution
+    output_solution << Change_str((*dat).code) << ",";
+    output_solution << (*dat).min_solution_step << ",";
+    output_solution << (*dat).min_solution_num << ",";
+    for (i = 0; i < (*dat).min_solution_case.size(); i++) {
+        output_solution << Change_str((*dat).min_solution_case[i]);
+        if (i + 1 != (*dat).min_solution_case.size()) {
+            output_solution << "-";
+        }
+    }
+    output_solution << "," << (*dat).solution_num;
+    if (Output_solution_case == false) {return;}
+    output_solution << ",";
+    for (i = 0; i < (*dat).solution_case.size(); i++) {
+        output_solution << Change_str((*dat).solution_case[i]);
+        output_solution << "(" << (*dat).solution_step[i] << ")";
+        if (i + 1 != (*dat).solution_case.size()) {
+            output_solution << "-";
+        }
+    }
+    output_solution << endl;
+}
+/*
 void Show_detail(Case_detail *dat) {
+    unsigned int i;
     cout << "============================" << endl;
     cout << "farthest_step = " << (*dat).farthest_step << endl;
     cout << "farthest_num = " << (*dat).farthest_num << endl;
     cout << "farthest_case: " << endl;
-    for (int i = 0; i < (*dat).farthest_case.size(); i++) {
+    for (i = 0; i < (*dat).farthest_case.size(); i++) {
         cout << "   " << Change_str((*dat).farthest_case[i]) << endl;
     }
     cout << "============================" << endl;
     cout << "min_solution_step = " << (*dat).min_solution_step << endl;
     cout << "min_solution_num = " << (*dat).min_solution_num << endl;
     cout << "min_solution_case: " << endl;
-    for (int i = 0; i < (*dat).min_solution_case.size(); i++) {
+    for (i = 0; i < (*dat).min_solution_case.size(); i++) {
         cout << "   " << Change_str((*dat).min_solution_case[i]) << endl;
     }
     cout << "============================" << endl;
     cout << "solution_num = " << (*dat).solution_num << endl;
     cout << "solution_case(solution_step): " << endl;
-    for (int i = 0; i < (*dat).solution_case.size(); i++) {
+    for (i = 0; i < (*dat).solution_case.size(); i++) {
         cout << "  " << Change_str((*dat).solution_case[i]);
         cout << "(" << (*dat).solution_step[i] << ")" << endl;
     }
     cout << "============================" << endl;
 }
-
+*/
 Case_detail* Analyse_Case(Case *start) { // 根据关系网计算布局的参数
-    int i, k;
+    unsigned int i, k;
     vector <Case *> Case_Stack;
     Case_detail *dat = new Case_detail; // dat储存分析结果
     Case_detail_init(*dat); // 初始化
+    (*dat).code = (*start).Code;
     (*start).Layer_num = 0; //令入口节点的层级为0
     Case_Stack.push_back(start); // 加入队列中
     i = 0;
@@ -179,13 +228,13 @@ Case_detail* Analyse_Case(Case *start) { // 根据关系网计算布局的参数
         }
     }
     (*dat).farthest_num = (*dat).farthest_case.size(); // 得到最远布局的个数
-    Sort((*dat).farthest_case);
+    sort((*dat).farthest_case.begin(), (*dat).farthest_case.end());
     // 计算解的情况
     (*dat).solution_num = (*dat).solution_case.size(); // 得到解的个数
     int step = -1;
     vector < vector <unsigned long long> > temp; // 暂存不同步数解的信息
     for (i = 0; i < (*dat).solution_step.size(); i++) { // 遍历全部解
-        if (step != (*dat).solution_step[i]) { // 发现步数不同
+        if (step != int((*dat).solution_step[i])) { // 发现步数不同
             temp.resize(temp.size() + 1); // temp扩容
             step = (*dat).solution_step[i]; // 重置步数
         }
@@ -193,7 +242,7 @@ Case_detail* Analyse_Case(Case *start) { // 根据关系网计算布局的参数
     }
     (*dat).solution_case.clear(); // 清空原数据
     for (i = 0; i < temp.size(); i++) { // 将排序后的数据重新写入
-        Sort(temp[i]); // 排序同一步数的不同解
+        sort(temp[i].begin(), temp[i].end()); // 排序同一步数的不同解
         if (i == 0) { // 若为最少步数
             (*dat).min_solution_case = temp[0]; // 记录最少步解的布局
             (*dat).min_solution_num = temp[0].size(); // 记录最少步解的个数
@@ -216,18 +265,6 @@ void Case_detail_init(Case_detail &dat) { // 初始化数据
     dat.solution_num = 0;
     dat.solution_case.clear();
     dat.solution_step.clear();
-}
-
-void Sort(vector <unsigned long long> &dat) { // 将输入的vector排序 (从小到大)
-	unsigned int i, j;
-	if (dat.size() == 0) {return;} // 空的则退出
-	for (i = 0; i < dat.size() - 1; i++) { // 冒泡排序
-		for (j = 0; j < dat.size() - 1 - i; j++) {
-			if (dat[j] >= dat[j + 1]) {
-                swap(dat[j], dat[j + 1]);
-            }
-		}
-	}
 }
 
 vector <unsigned long long> Find_Next_Case(unsigned long long Code) { // 找到下一步移动的情况(一步可以为同一块多次移动)
@@ -388,7 +425,7 @@ void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 实
     Case_cal dat_mod = dat; // 新建对象 在Add_Case中加入层中或被释放
     switch (dat_mod.type[num]) { // 注入移动后的信息
         case 0: // 2 * 2
-            dat_mod.status[x][y] = dat_mod.status[x][y + 1] 
+            dat_mod.status[x][y] = dat_mod.status[x][y + 1]
                 = dat_mod.status[x + 1][y] = dat_mod.status[x + 1][y + 1] = num;
             break;
         case 1: // 2 * 1
