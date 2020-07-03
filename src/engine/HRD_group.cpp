@@ -8,20 +8,53 @@
 
 ofstream output_farthest;
 ofstream output_solution;
+ifstream input_seed;
 
-void HRD_group::Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution) {
+bool HRD_group::Multi_Analyse(string seed_File_name, string name_farthest, string name_solution, bool is_output_solution) {
     HRD_cal cal;
+    char str[10];
     vector <unsigned long long> dat;
-    if (cal.Check_Code(seed) == false) {return;}
-    dat = cal.Calculate_All(seed);
-    sort(dat.begin(), dat.end());
-    File_name_farthest = name_farthest;
-    File_name_solution = name_solution;
+    vector <unsigned long long> seed; // 储存所有将要计算的布局编码
+    input_seed.open(seed_File_name);
+    while (input_seed.eof() != true) { // 从外部文件读入列表
+        input_seed >> str;
+        seed.push_back(Change_int(str));
+    }
+    for (unsigned int i = 0; i < seed.size(); i++) { // 判断编码正确性
+        if (cal.Check_Code(seed[i]) == false) {
+            cout << "input code error" << endl; // 发现错误编码
+            return false; // 退出
+        }
+    }
     Output_solution_case = is_output_solution;
-    Analyse_Group(dat);
+    output_farthest.open(name_farthest);
+    output_solution.open(name_solution);
+    for (unsigned int i = 0; i < seed.size(); i++) {
+        cout << "Start: " << Change_str(seed[i]) << endl;
+        dat = cal.Calculate_All(seed[i]); // 得到整个群
+        sort(dat.begin(), dat.end()); // 排列
+        Analyse_Group(dat); // 分析整个群
+    }
+    output_farthest.close();
+    output_solution.close();
+    return true;
 }
 
-void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个群 并将结果以csv格式输出到文件
+void HRD_group::Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution) { // 根据群中一个布局分析整个群全部布局的参数 并将结果以csv格式输出到文件
+    HRD_cal cal;
+    vector <unsigned long long> dat;
+    if (cal.Check_Code(seed) == false) {return;} // 编码错误 退出
+    dat = cal.Calculate_All(seed); // 得到整个群
+    sort(dat.begin(), dat.end()); // 排列
+    Output_solution_case = is_output_solution;
+    output_farthest.open(name_farthest);
+    output_solution.open(name_solution);
+    Analyse_Group(dat); // 分析整个群
+    output_farthest.close();
+    output_solution.close();
+}
+
+void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个群并将结果输出到文件
     unsigned int i, j, k;
     int hash_index;
     vector <Case *> List; // 全组数据
@@ -52,8 +85,6 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
         }
     }
     Case_detail *result;
-    output_farthest.open(File_name_farthest);
-    output_solution.open(File_name_solution);
     for(i = 0; i < List.size(); i++) { // 遍历整个队列
         for (k = 0; k < List.size(); k++) { // 初始化
             (*List[k]).Layer_num = -1;
@@ -61,13 +92,11 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
         }
         result = Analyse_Case(List[i]); // 计算对应布局数据并储存到result中
         Output_detail(result);
-        delete result;
+        delete result; // 释放内存
         if (i % 13 == 0) {
             cout << i << "/" << List.size() << endl;
         }
     }
-    output_farthest.close();
-    output_solution.close();
     for (i = 0; i < List.size(); i++) { // 释放List数据
         delete List[i];
     }
@@ -429,7 +458,7 @@ bool HRD_group::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析�
     }
     num = 0;
     for (i = 15; i >= 0; i--) { // 载入排列到range
-        range[i] = Code & 0x3  ;
+        range[i] = Code & 0x3;
         if (range[i] == 0) {num++;}
         Code >>= 2;
     }

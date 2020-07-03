@@ -10,6 +10,7 @@ class HRD_group {
         unsigned long long Change_int(char str[10]);
         string Change_str(unsigned long long dat);
         void Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution);
+        bool Multi_Analyse(string seed_File_name, string name_farthest, string name_solution, bool is_output_solution);
 
     private:
         struct Case_cal {
@@ -39,9 +40,7 @@ class HRD_group {
             vector <unsigned long long> solution_step;
         };
         vector <unsigned long long> Next_Case_dat; // 储存Find_Next_Case找到的结果
-        string File_name_farthest;
-        string File_name_solution;
-        bool Output_solution_case;
+        bool Output_solution_case; // 是否输出全部solution_case
 
         bool Parse_Code(Case_cal &dat, unsigned long long Code);
         void Get_Code(Case_cal &dat);

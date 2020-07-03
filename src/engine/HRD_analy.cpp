@@ -5,6 +5,108 @@
 #include <fstream>
 #include "HRD_analy.h"
 
+void HRD_analy::Output_Graph(unsigned long long Code, unsigned int square_width, unsigned int square_gap, char str[3]) {
+    Case_cal dat;
+    unsigned int i, j;
+    unsigned int x, y;
+    unsigned int width, height;
+    bool exclude[4][5]; // 用于标记排除
+    vector < vector <bool> > temp;
+    temp.resize(square_width * 4 + square_gap * 3);
+    for (x = 0; x < temp.size(); x++) {
+        temp[x].resize(square_width * 5 + square_gap * 4);
+        for (y = 0; y < temp[0].size(); y++) {
+            temp[x][y] = false;
+        }
+    }
+    for (x = 0; x < 4; x++) { // 初始化exclude
+        for (y = 0; y < 5; y++) {
+            exclude[x][y] = false;
+        }
+    }
+    Parse_Code(dat, Code);
+    for (y = 0; y < 5; y++) { // 遍历20个格
+        for (x = 0; x < 4; x++) {
+            if (exclude[x][y] == true || dat.status[x][y] == 0xFE) {continue;} // 该格为空或已被占用
+            switch (dat.type[dat.status[x][y]]) { // type -> 0 / 1 / 2 / 3
+                case 0: // 2 * 2
+                    width = height = 2;
+                    exclude[x][y + 1] = exclude[x + 1][y] = exclude[x + 1][y + 1] = true;
+                    break;
+                case 1: // 2 * 1
+                    width = 2;
+                    height = 1;
+                    exclude[x + 1][y] = true;
+                    break;
+                case 2: // 1 * 2
+                    width = 1;
+                    height = 2;
+                    exclude[x][y + 1] = true;
+                    break;
+                case 3: // 1 * 1
+                    width = height = 1;
+                    break;
+            }
+            if (width == 1) {
+                width = square_width;
+            } else {
+                width = square_width * 2 + square_gap;
+            }
+            if (height == 1) {
+                height = square_width;
+            } else {
+                height = square_width * 2 + square_gap;
+            }
+            for (i = 0; i < width; i++) {
+                for (j = 0; j < height; j++) {
+                    temp[x * (square_width + square_gap) + i][y * (square_width + square_gap) + j] = true;
+                }
+            }
+        }
+    }
+    width = temp.size();
+    height = temp[0].size();
+    for (x = 0; x < width + square_gap * 2 + 2; x++) {
+        cout << str;
+    }
+    cout << endl;
+    for (y = 0; y < square_gap; y++) {
+        cout << str;
+        for (x = 0; x < width + square_gap * 2; x++) {
+            cout << "  ";
+        }
+        cout << str << endl;
+    }
+    for (y = 0; y < height; y++) {
+        cout << str;
+        for (x = 0; x < square_gap; x++) {
+            cout << "  ";
+        }
+        for (x = 0; x < width; x++) {
+            if (temp[x][y] == true) {
+                cout << str;
+            } else {
+                cout << "  ";
+            }
+        }
+        for (x = 0; x < square_gap; x++) {
+            cout << "  ";
+        }
+        cout << str << endl;
+    }
+    for (y = 0; y < square_gap; y++) {
+        cout << str;
+        for (x = 0; x < width + square_gap * 2; x++) {
+            cout << "  ";
+        }
+        cout << str << endl;
+    }
+    for (x = 0; x < width + square_gap * 2 + 2; x++) {
+        cout << str;
+    }
+    cout << endl;
+}
+
 void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     unsigned int i, j, k;
     ofstream output;
@@ -13,6 +115,7 @@ void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
         cout << "Output into: " << File_name << "...";
     }
     output.open(File_name);
+    // min_solution
     output << "[Min_solution_step]" << endl;
     output << min_solution_step << endl;
     output << "[Min_solution_case]" << endl;
@@ -20,6 +123,7 @@ void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     for (i = 0; i < min_solution_case.size(); i++) {
         output << Change_str(min_solution_case[i]) << endl;
     }
+    // farthest
     output << "[Farthest_step]" << endl;
     output << farthest_step << endl;
     output << "[Farthest_case]" << endl;
@@ -27,11 +131,13 @@ void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     for (i = 0; i < farthest_case.size(); i++) {
         output << Change_str(farthest_case[i]) << endl;
     }
+    // solution
     output << "[Solution]" << endl;
     output << "num: " << solution_num << endl;
     for (i = 0; i < solution_case.size(); i++) {
         output << Change_str(solution_case[i]) << "(" << solution_step[i] << ")" << endl;
     }
+    // layer
     output << "[Layer_Size]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         output << i << " -> " << Layer[i].size() << endl;
@@ -486,7 +592,7 @@ void HRD_analy::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code �
     dat.code &= 0xFFFFFFFFF; // 清除高28位内容
 }
 
-bool HRD_analy::Parse_Code(unsigned long long Code) {
+bool HRD_analy::Parse_Code(unsigned long long Code) { // 外部解析函数 结果储存在Parse_dat 返回编码正确性
     Parse_dat.layer_num = Parse_dat.layer_index = 0;
     return Parse_Code(Parse_dat, Code);
 }
@@ -506,7 +612,7 @@ bool HRD_analy::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析�
     }
     num = 0;
     for (i = 15; i >= 0; i--) { // 载入排列到range
-        range[i] = Code & 0x3  ;
+        range[i] = Code & 0x3;
         if (range[i] == 0) {num++;}
         Code >>= 2;
     }
@@ -517,7 +623,6 @@ bool HRD_analy::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析�
     x = Code % 4;
     y = Code / 4;
     dat.status[x][y] = dat.status[x + 1][y] = dat.status[x][y + 1] = dat.status[x + 1][y + 1] = 0;
-
     num = x = y = 0;
     for (i = 0; i < 16; i++) {
         while (dat.status[x][y] != 0xFF) { // 找到下一个未填入的位置

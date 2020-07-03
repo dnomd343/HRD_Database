@@ -41,6 +41,8 @@ class HRD_analy {
         bool Parse_Code(unsigned long long Code);
         void Analyse_Case(unsigned long long code);
         void Output_Detail(string File_name);
+        void Free_Data();
+        void Output_Graph(unsigned long long Code, unsigned int square_width, unsigned int square_gap, char str[2]);
 
     private:
         vector <Case_cal *> Layer_hash[0x10000]; // 哈希表
@@ -53,7 +55,6 @@ class HRD_analy {
         void Find_Next_Case(Case_cal &dat_raw);
         void Add_Case(Case_cal *dat);
         void Calculate(unsigned long long code);
-        void Free_Data();
 };
 
 #endif

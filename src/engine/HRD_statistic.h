@@ -8,7 +8,7 @@ using namespace std;
 class HRD_statistic {
     public:
         void Find_All_Case(string File_name);
-        void Make_main_table(string File_name);
+        void All_Statistic();
 
     private:
         struct Case {
@@ -26,8 +26,9 @@ class HRD_statistic {
             unsigned int group_num;
             unsigned int group_index;
         };
-        vector <Case *> All_Case;
+        vector <Case *> All_Case; // 记录所有布局的信息
 
+        void Get_seed();
         void Find_All_Case();
         void Sort_All_Case();
         vector <Case_group *> Split_Group(vector <unsigned long long> dat);

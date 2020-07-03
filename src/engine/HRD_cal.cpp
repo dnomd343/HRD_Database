@@ -15,7 +15,7 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
     for (i = 0; i < List.size(); i++) {
         data.push_back((*List[i]).code); // 储存计算结果
     }
-    init_data();
+    init_data(); // 防止内存泄漏
     return data;
 }
 
@@ -35,7 +35,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned
     if (flag == true) { // 若找到目标
         return Get_Path(result);
     } else { // 未找到目标
-        init_data();
+        init_data(); // 防止内存泄漏
         return temp; // 返回空序列
     }
 }
@@ -55,7 +55,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻
     if (flag == true) { // 若找到解
         return Get_Path(result);
     } else { // 无解
-        init_data();
+        init_data(); // 防止内存泄漏
         return temp; // 返回空序列
     }
 }
@@ -86,7 +86,7 @@ void HRD_cal::init_data() { // 初始化数据结构
     List_source.clear();
 }
 
-bool HRD_cal::Check_Code(unsigned long long Code) {
+bool HRD_cal::Check_Code(unsigned long long Code) { // 检查编码: 错误 -> false / 正确 -> true
     Case_cal dat;
     return Parse_Code(dat, Code);
 }
@@ -387,7 +387,7 @@ bool HRD_cal::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编�
     }
     num = 0;
     for (i = 15; i >= 0; i--) { // 载入排列到range
-        range[i] = Code & 0x3  ;
+        range[i] = Code & 0x3;
         if (range[i] == 0) {num++;}
         Code >>= 2;
     }
@@ -398,7 +398,6 @@ bool HRD_cal::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编�
     x = Code % 4;
     y = Code / 4;
     dat.status[x][y] = dat.status[x + 1][y] = dat.status[x][y + 1] = dat.status[x + 1][y + 1] = 0;
-
     num = x = y = 0;
     for (i = 0; i < 16; i++) {
         while (dat.status[x][y] != 0xFF) { // 找到下一个未填入的位置
