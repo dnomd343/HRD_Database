@@ -8,7 +8,7 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
     vector <unsigned long long> data;
     init_data(); // 初始化
     mode = 0; // 设置模式为全集计算
-    if (Check_Code(Code) == false) { // 编码错误
+    if (!Check_Code(Code)) { // 编码错误
         return data; // 返回空序列
     }
     cal(Code); // 进行广搜
@@ -21,7 +21,7 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
 
 vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned long long target) { // 寻找到target的最短路径
     vector <unsigned long long> temp;
-    if (Check_Code(Code) == false || Check_Code(target) == false) { // 编码错误
+    if (!(Check_Code(Code) && Check_Code(target))) { // 编码错误
         return temp; // 返回空序列
     }
     if (Code == target) { // 若输入为target
@@ -32,7 +32,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned
     mode = 2; // 设置模式为寻找特定目标
     target_code = target;
     cal(Code); // 进行广搜
-    if (flag == true) { // 若找到目标
+    if (flag) { // 若找到目标
         return Get_Path(result);
     } else { // 未找到目标
         init_data(); // 防止内存泄漏
@@ -42,7 +42,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned
 
 vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻找最少步解
     vector <unsigned long long> temp;
-    if (Check_Code(Code) == false) { // 编码错误
+    if (!Check_Code(Code)) { // 编码错误
         return temp; // 返回空序列
     }
     if ((Code >> 32) == 0xD) { // 若输入已经为解
@@ -52,7 +52,7 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻
     init_data(); // 初始化
     mode = 1; // 设置模式为寻解
     cal(Code); // 进行广搜
-    if (flag == true) { // 若找到解
+    if (flag) { // 若找到解
         return Get_Path(result);
     } else { // 无解
         init_data(); // 防止内存泄漏
@@ -96,18 +96,17 @@ void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标
     now_move = 0; // 设置起始搜索节点编号为0
     result = 0;
     flag = false; // 设置为暂未找到
-    if (Parse_Code(*start, Code) == false) { // 若输入编码错误 退出
+    if (!Parse_Code(*start, Code)) { // 若输入编码错误 退出
         delete start;
         return;
     }
     List.push_back(start); // 加入根节点
     List_source.push_back(0);
     List_hash[0xffff & ((*start).code >> 16)].push_back(start);
-    while (1 == 1) { // 创建死循环
+    while (now_move != List.size()) { // 找到所有元素后退出
         Find_Next_Case(*List[now_move]);
-        if (flag == true) {break;} // 若找到则退出
+        if (flag) {break;} // 若找到则退出
         now_move++;
-        if (now_move == List.size()) {break;} // 已经找到所有元素则退出
     }
 }
 
@@ -119,7 +118,7 @@ void HRD_cal::Add_Case(Case_cal *dat) { // 将找到的布局加入队列中
             // 通过freeze表合并来屏蔽不必要的移动
             for (x = 0; x < 4; x++) { // 遍历freeze表
                 for (y = 0; y < 5; y++) {
-                    if ((*dat).freeze[x][y] == true) { // 将输入表合并到原先的表上
+                    if ((*dat).freeze[x][y]) { // 将输入表合并到原先的表上
                         (*List_hash[hash_index][i]).freeze[x][y] = true;
                     }
                 }
@@ -151,14 +150,14 @@ void HRD_cal::Find_Next_Case(Case_cal &dat_raw) { // 找到下一步移动的情
     Case_cal dat = dat_raw;
     for (y = 0; y < 5; y++) { // 仅保留空格位置的freeze为true
         for (x = 0; x < 4; x++) {
-            if (dat.status[x][y] != 0xFE && dat.freeze[x][y] == true) { // 不为空格但freeze为true
+            if (dat.status[x][y] != 0xFE && dat.freeze[x][y]) { // 不为空格但freeze为true
                 dat.freeze[x][y] = false; // 重置为false
             }
         }
     }
     for (y = 0; y < 5; y++) { // 遍历整个棋盘
         for (x = 0; x < 4; x++) {
-            if (dat_raw.freeze[x][y] == true) {continue;} // 遇到freeze为true的跳过
+            if (dat_raw.freeze[x][y]) {continue;} // 遇到freeze为true的跳过
             num = dat.status[x][y]; // 统一修改(x, y)块
             dat.status[x][y] = 0xFE;
             dat.freeze[x][y] = true;
@@ -298,7 +297,7 @@ void HRD_cal::Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][
 }
 
 void HRD_cal::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 实现移动并将结果发送到Add_Case
-    if (addr[x][y] == true) { // 重复
+    if (addr[x][y]) { // 重复
         return; // 退出
     } else {
         addr[x][y] = true; // 加入位置数据
@@ -337,7 +336,7 @@ void HRD_cal::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code 输�
     num = 0;
     for (y = 0; y < 5; y++) { // 遍历20个格
         for (x = 0; x < 4; x++) {
-            if (temp[x][y] == true) {continue;} // 该格已被占用
+            if (temp[x][y]) {continue;} // 该格已被占用
             if (dat.status[x][y] == 0xFE) { // space
                 num++;
                 dat.code <<= 2;

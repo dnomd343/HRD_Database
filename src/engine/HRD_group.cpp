@@ -21,7 +21,7 @@ bool HRD_group::Multi_Analyse(string seed_File_name, string name_farthest, strin
         seed.push_back(Change_int(str));
     }
     for (unsigned int i = 0; i < seed.size(); i++) { // 判断编码正确性
-        if (cal.Check_Code(seed[i]) == false) {
+        if (!cal.Check_Code(seed[i])) {
             cout << "input code error" << endl; // 发现错误编码
             return false; // 退出
         }
@@ -43,7 +43,7 @@ bool HRD_group::Multi_Analyse(string seed_File_name, string name_farthest, strin
 void HRD_group::Batch_Analyse(unsigned long long seed, string name_farthest, string name_solution, bool is_output_solution) { // 根据群中一个布局分析整个群全部布局的参数 并将结果以csv格式输出到文件
     HRD_cal cal;
     vector <unsigned long long> dat;
-    if (cal.Check_Code(seed) == false) {return;} // 编码错误 退出
+    if (!cal.Check_Code(seed)) {return;} // 编码错误 退出
     dat = cal.Calculate_All(seed); // 得到整个群
     sort(dat.begin(), dat.end()); // 排列
     Output_solution_case = is_output_solution;
@@ -126,7 +126,7 @@ void HRD_group::Output_detail(Case_detail *dat) {
         }
     }
     output_solution << "," << (*dat).solution_num;
-    if (Output_solution_case == false) {
+    if (!Output_solution_case) {
         output_solution << endl;
         return;
     }
@@ -143,40 +143,39 @@ void HRD_group::Output_detail(Case_detail *dat) {
 
 HRD_group::Case_detail* HRD_group::Analyse_Case(Case *start) { // 根据关系网计算布局的参数
     unsigned int i, k;
-    vector <Case *> Case_Stack;
+    vector <Case *> case_list;
     Case_detail *dat = new Case_detail; // dat储存分析结果
     Case_detail_init(*dat); // 初始化
     (*dat).code = (*start).Code;
     (*start).Layer_num = 0; //令入口节点的层级为0
-    Case_Stack.push_back(start); // 加入队列中
+    case_list.push_back(start); // 加入队列中
     i = 0;
-    while (1 == 1) { // 创建死循环
-        if ((*Case_Stack[i]).addr_2x2 == 0xD) { // 2 * 2块在出口位置
-            if ((*Case_Stack[i]).Flag == false) { // 未被标识
-                (*dat).solution_case.push_back((*Case_Stack[i]).Code); // 判定为解
-                (*dat).solution_step.push_back((*Case_Stack[i]).Layer_num);
-                (*Case_Stack[i]).Flag = true; // 进行标识
+    while (i != case_list.size()) { // 找到所有元素后退出
+        if ((*case_list[i]).addr_2x2 == 0xD) { // 2 * 2块在出口位置
+            if (!(*case_list[i]).Flag) { // 未被标识
+                (*dat).solution_case.push_back((*case_list[i]).Code); // 判定为解
+                (*dat).solution_step.push_back((*case_list[i]).Layer_num);
+                (*case_list[i]).Flag = true; // 进行标识
             }
         }
-        for (k = 0; k < (*Case_Stack[i]).Next.size(); k++) { // 检测目标布局的全部子布局
-            if ((*(*Case_Stack[i]).Next[k]).Layer_num == -1) { // 若之前还未被搜索到
-                (*(*Case_Stack[i]).Next[k]).Layer_num = (*Case_Stack[i]).Layer_num + 1; // 记录层级信息
-                Case_Stack.push_back((*Case_Stack[i]).Next[k]); // 加入搜索队列
+        for (k = 0; k < (*case_list[i]).Next.size(); k++) { // 检测目标布局的全部子布局
+            if ((*(*case_list[i]).Next[k]).Layer_num == -1) { // 若之前还未被搜索到
+                (*(*case_list[i]).Next[k]).Layer_num = (*case_list[i]).Layer_num + 1; // 记录层级信息
+                case_list.push_back((*case_list[i]).Next[k]); // 加入搜索队列
             }
-            if ((*Case_Stack[i]).Flag == true) { // 若已经标识 则感染下一层的子布局
-                if ((*(*Case_Stack[i]).Next[k]).Layer_num == (*Case_Stack[i]).Layer_num + 1) { // 若为下一层
-                    (*(*Case_Stack[i]).Next[k]).Flag = true; // 标识
+            if ((*case_list[i]).Flag) { // 若已经标识 则感染下一层的子布局
+                if ((*(*case_list[i]).Next[k]).Layer_num == (*case_list[i]).Layer_num + 1) { // 若为下一层
+                    (*(*case_list[i]).Next[k]).Flag = true; // 标识
                 }
             }
         }
         i++; // 搜索下一个布局
-        if (i == Case_Stack.size()) {break;} // 搜索完毕 退出
     }
     // 计算最远布局
-    (*dat).farthest_step = (*Case_Stack[Case_Stack.size() - 1]).Layer_num; // 得到最远步数
-    for (int i = Case_Stack.size() - 1; i >= 0; i--) { // 逆向搜索
-        if ((*Case_Stack[i]).Layer_num == (*dat).farthest_step) { // 如果是最远布局
-            (*dat).farthest_case.push_back((*Case_Stack[i]).Code); // 加入记录
+    (*dat).farthest_step = (*case_list[case_list.size() - 1]).Layer_num; // 得到最远步数
+    for (int i = case_list.size() - 1; i >= 0; i--) { // 逆向搜索
+        if ((*case_list[i]).Layer_num == (*dat).farthest_step) { // 如果是最远布局
+            (*dat).farthest_case.push_back((*case_list[i]).Code); // 加入记录
         } else {
             break; // 退出搜索
         }
@@ -239,7 +238,7 @@ vector <unsigned long long> HRD_group::Find_Next_Case(unsigned long long Code) {
     Next_Case_dat.clear(); // 清空序列
     for (y = 0; y < 5; y++) { // 遍历整个棋盘
         for (x = 0; x < 4; x++) {
-            if (exclude[x][y] == true) {continue;}
+            if (exclude[x][y]) {continue;}
             for (i = 0; i < 4; i++) { // 初始化
                 for (j = 0; j < 5; j++) {
                     addr[i][j] = false;
@@ -371,7 +370,7 @@ void HRD_group::Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4
 }
 
 void HRD_group::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]) { // 实现移动并将结果发送到Add_Case
-    if (addr[x][y] == true) { // 重复
+    if (addr[x][y]) { // 重复
         return; // 退出
     } else {
         addr[x][y] = true; // 加入位置数据
@@ -409,7 +408,7 @@ void HRD_group::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code �
     num = 0;
     for (y = 0; y < 5; y++) { // 遍历20个格
         for (x = 0; x < 4; x++) {
-            if (temp[x][y] == true) {continue;} // 该格已被占用
+            if (temp[x][y]) {continue;} // 该格已被占用
             if (dat.status[x][y] == 0xFE) { // space
                 num++;
                 dat.code <<= 2;

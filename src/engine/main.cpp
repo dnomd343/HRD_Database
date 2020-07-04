@@ -319,7 +319,7 @@ void find_all_code(string File_name) {
 }
 
 void show_help() {
-    cout << "(version: v0.1)" << endl;
+    cout << "(version: v1.0)" << endl;
     cout << "Usage of HRD_engine:" << endl;
     cout << endl;
     cout << "  --show <code> [square_width]" << endl;

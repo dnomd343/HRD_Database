@@ -217,7 +217,7 @@ void HRD_statistic::Find_All_Case() { // 找到所有编码
         if (n % 4 == 3) {continue;} // 排除2 * 2块不可能在的位置
         for (i = 0; i <= 0xFFFFFFFF; i++) { // 遍历编码低32位
             Code = (n << 32) | i; // 生成Code
-            if (cal.Check_Code(Code) == true) { // 检查编码是否正确
+            if (cal.Check_Code(Code)) { // 检查编码是否正确
                 Case *temp = new Case;
                 (*temp).code = Code;
                 (*temp).id = num;
