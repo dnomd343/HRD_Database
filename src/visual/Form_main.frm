@@ -2,53 +2,45 @@ VERSION 5.00
 Begin VB.Form Form_main 
    AutoRedraw      =   -1  'True
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "HRD Visual v0.2 by Dnomd343"
-   ClientHeight    =   6585
+   Caption         =   "HRD Visual v1.0 by Dnomd343"
+   ClientHeight    =   6495
    ClientLeft      =   45
    ClientTop       =   390
-   ClientWidth     =   9390
+   ClientWidth     =   4815
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   6585
-   ScaleWidth      =   9390
+   ScaleHeight     =   6495
+   ScaleWidth      =   4815
    StartUpPosition =   2  '屏幕中心
-   Begin VB.CommandButton Command1 
-      Caption         =   "Command1"
-      Height          =   360
-      Left            =   5820
-      TabIndex        =   4
-      Top             =   5925
-      Width           =   840
+   Begin VB.Timer Timer 
+      Enabled         =   0   'False
+      Interval        =   10
+      Left            =   4305
+      Top             =   5040
    End
-   Begin VB.Timer Timer1 
-      Interval        =   100
-      Left            =   8280
-      Top             =   5385
-   End
-   Begin VB.TextBox Text_debug 
-      Height          =   5190
-      Left            =   5505
-      MultiLine       =   -1  'True
+   Begin VB.CommandButton Command_OK 
+      Caption         =   "OK"
+      Height          =   465
+      Left            =   3615
       TabIndex        =   3
-      Top             =   495
-      Width           =   2250
+      Top             =   5880
+      Width           =   1050
    End
-   Begin VB.CommandButton Command_Get_Code 
-      Caption         =   "生成编码"
+   Begin VB.CommandButton Command_Clear 
+      Caption         =   "Clear"
       Height          =   465
-      Left            =   210
+      Left            =   150
       TabIndex        =   2
-      Top             =   5970
-      Width           =   975
+      Top             =   5900
+      Width           =   1050
    End
-   Begin VB.CommandButton Command_Print 
-      Caption         =   "解译编码"
-      Height          =   465
-      Left            =   3180
-      TabIndex        =   1
-      Top             =   5940
-      Width           =   975
+   Begin VB.TextBox Text_Focus 
+      Height          =   270
+      Left            =   6000
+      TabIndex        =   0
+      Top             =   0
+      Width           =   180
    End
    Begin VB.TextBox Text_Code 
       Alignment       =   2  'Center
@@ -62,10 +54,11 @@ Begin VB.Form Form_main
          Strikethrough   =   0   'False
       EndProperty
       Height          =   465
-      Left            =   1200
-      TabIndex        =   0
-      Text            =   "4FEA13400"
-      Top             =   5955
+      Left            =   1400
+      MaxLength       =   9
+      TabIndex        =   1
+      Text            =   "---"
+      Top             =   5900
       Width           =   2040
    End
 End
@@ -81,66 +74,113 @@ Dim click_x_ As Integer, click_y_ As Integer ' 记录按下位置的窗体坐标
 Dim mouse_x As Integer, mouse_y As Integer ' 记录当前鼠标位置合法对应的棋盘编号
 Dim output As Case_size ' 输出大小
 Dim case_main As Case_detail ' 布局信息
+Dim timer_ctl As Integer
 Dim exclude(-1 To 1, -1 To 1) As Boolean ' 记录按下位置周围是否能放置棋子 true -> 不难 / false -> 能
-
-Private Sub Command_Get_Code_Click()
-  Text_Code = Get_Code(case_main)
-End Sub
-
-Private Sub Command1_Click()
-  MsgBox Check_2x2_seat
-End Sub
-
-Private Sub Form_Load()
+Private Sub Form_Load() ' 窗体初始化
+  Call Init_case
   print_now = False
-  Dim i As Integer, j As Integer
-  For i = 0 To 14
-    case_main.kind(i) = 255
-  Next i
-  For i = 0 To 3
-    For j = 0 To 4
-      case_main.status(i, j) = 254
-    Next j
-  Next i
-
   output.start_x = 150
   output.start_y = 150
-
-  output.square_width = 1000
   output.gap = 100
+  output.square_width = 1000
   style.block_line_width = 1
   style.case_line_width = 2
   style.block_line_color = RGB(0, 158, 240)
   style.case_line_color = RGB(0, 158, 240)
   style.block_color = RGB(225, 245, 255)
   style.case_color = RGB(248, 254, 255)
-'  case_main.status(1, 1) = 254
-'  case_main.status(1, 2) = 254
-'  case_main.status(2, 1) = 254
-'  case_main.status(2, 2) = 254
-'  case_main.kind(0) = 255
-  Call Output_case(Form_main, case_main, output)
-  'Call Get_Code(case_main)
-
+  Call Output_case(Form_main, case_main, output) ' 显示界面
 End Sub
-Private Sub Command_Print_Click()
-  If Len(Text_Code) <> 9 Then MsgBox "编码有误", , "提示": Exit Sub
-  If Parse_Code(Text_Code) = True Then
-    case_main = Parse_data
-    Call Output_case(Form_main, case_main, output)
+Private Sub Command_Clear_Click() ' 清除当前显示
+  Call Init_case
+  Call Output_case(Form_main, case_main, output) ' 刷新显示界面
+End Sub
+Private Sub Command_OK_Click() ' 完成按钮
+  If Try_parse_code(Text_Code) = False Then
+    MsgBox "编码错误"
   Else
-    MsgBox "编码有误", , "提示"
+    Text_Code = UCase(Text_Code) & String(9 - Len(Text_Code), "0") ' 修改为大写并补0
+    Text_Focus.SetFocus ' 切走焦点
   End If
 End Sub
-
-Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single) ' 按下鼠标按键
+Private Sub Text_Code_DblClick() ' 双击文本框 清空内容
+  Text_Code = ""
+  Text_Code.ForeColor = vbBlack
+End Sub
+Private Sub Text_Code_GotFocus() ' 文本框得到焦点
+  If Text_Code = "---" Then Text_Code = "" ' 若还未输入内容则清空
+End Sub
+Private Sub Text_Code_LostFocus() ' 文本框失去焦点
+  If Text_Code = "" Then ' 未填写内容
+    Text_Code = "---"
+    Call Try_get_code
+  Else
+    If Text_Code.ForeColor = vbBlack Then Text_Code = UCase(Text_Code) ' 全部改为大写
+  End If
+End Sub
+Private Sub Text_Code_KeyPress(KeyAscii As Integer) ' 文本框输入内容
+  Dim code As String
+  If KeyAscii = 13 Then ' 回车键
+    Call Command_OK_Click ' 模拟点击OK按钮
+  Else
+    timer_ctl = 200 ' 发送至timer显示
+    Timer.Enabled = True
+  End If
+End Sub
+Private Function Try_parse_code(code As String) As Boolean ' 尝试解码
+  Dim i As Integer, dat As String, flag As Boolean
+  If Len(code) > 9 Then Try_parse_code = False: Exit Function ' 输入超9位 退出
+  For i = 1 To Len(code) ' 遍历字符串
+    dat = Mid(code, i, 1)
+    flag = False
+    If Asc(dat) >= 48 And Asc(dat) <= 57 Then flag = True ' 0 - 9
+    If Asc(dat) >= 65 And Asc(dat) <= 70 Then flag = True ' A - F
+    If Asc(dat) >= 97 And Asc(dat) <= 102 Then flag = True ' a - f
+    If flag = False Then Try_parse_code = False: Exit Function ' 如果存在不合法字符 退出
+  Next i
+  If Len(code) < 9 Then code = code & String(9 - Len(code), "0") ' 补0到9位
+  If Parse_Code(code) = True Then ' 解码正确
+    case_main = Parse_data
+    Call Output_case(Form_main, case_main, output) ' 刷新显示界面
+    Try_parse_code = True
+  Else
+    Try_parse_code = False
+    Exit Function
+  End If
+End Function
+Private Sub Try_get_code() ' 尝试获取编码
+  Dim code As String
+  If case_main.kind(0) <> 0 Then Exit Sub ' 2 * 2块还未确定 退出
+  code = Get_Code(case_main)
+  While Right(code, 1) = "0" ' 去除后方的0
+    code = Left(code, Len(code) - 1)
+    If Len(code) = 0 Then Text_Code = "0": Exit Sub ' 若全为0 保留一个退出
+  Wend
+  Text_Code = code
+End Sub
+Private Sub Timer_Timer()
+  timer_ctl = timer_ctl - 1
+  If timer_ctl = -1 Then Timer.Enabled = False ' 运行次数限制
+  If Text_Code = "" Then ' 已经被删空
+    Call Init_case
+    Call Output_case(Form_main, case_main, output)
+    Exit Sub
+  End If
+  If Try_parse_code(Text_Code) = False Then ' 根据输入正确性显示不同颜色
+    Text_Code.ForeColor = vbRed
+  Else
+    Text_Code.ForeColor = vbBlack
+  End If
+End Sub
+Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single) ' 按下鼠标按键
+  Text_Focus.SetFocus
   Dim x_ As Integer, y_ As Integer, num As Integer
   Dim raw_x As Single, raw_y As Single
   Dim addr_x As Integer, addr_y As Integer
   Dim clear As Boolean
   clear = False
-  raw_x = Get_block_x(X) ' 得到点击位置在棋盘上的编号
-  raw_y = Get_block_y(Y)
+  raw_x = Get_block_x(x) ' 得到点击位置在棋盘上的编号
+  raw_y = Get_block_y(y)
   If raw_x < 1 Or raw_x > 4 Or raw_y < 1 Or raw_y > 5 Then Exit Sub ' 点击在棋盘外 退出
   addr_x = Int(raw_x) - 1 ' 若点击位置为间隙则映射到其左/上方
   addr_y = Int(raw_y) - 1
@@ -163,11 +203,13 @@ Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, Y A
   If clear = True Then ' 若被标识为点击在棋子上
     Call Clear_block(num) ' 清除该棋子
     Call Output_case(Form_main, case_main, output) ' 刷新显示界面
+    Text_Code = "---"
+    Call Try_get_code
     Exit Sub ' 退出
   End If
   If Int(raw_x) <> raw_x Or Int(raw_y) <> raw_y Then Exit Sub ' 点击在间隙上 退出
   click_x = raw_x: click_y = raw_y ' 记录有效的点击位置编号
-  click_x_ = X: click_y_ = Y ' 记录点击的真实位置
+  click_x_ = x: click_y_ = y ' 记录点击的真实位置
   num = case_main.status(click_x - 1, click_y - 1) ' 点击位置对应的编码
   For y_ = -1 To 1
     For x_ = -1 To 1
@@ -187,16 +229,16 @@ Private Sub Form_MouseDown(Button As Integer, Shift As Integer, X As Single, Y A
     Next x_
   Next y_
   print_now = True ' 进入绘制模式
-  Call Form_MouseMove(Button, Shift, X, Y) ' 发起鼠标移动事件
+  Call Form_MouseMove(Button, Shift, x, y) ' 发起鼠标移动事件
 End Sub
-Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single) ' 移动鼠标
+Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single) ' 移动鼠标
   Dim delta_x As Integer, delta_y As Integer
   Dim print_x As Integer, print_y As Integer
   Dim print_width As Integer, print_height As Integer
   If print_now = False Then Exit Sub ' 判断是否在绘制模式
   Call Output_case(Form_main, case_main, output) ' 覆盖上一次的显示
-  delta_x = signed(Get_block_x(X) - click_x) ' 记录鼠标位置与点击位置的相对方向
-  delta_y = signed(Get_block_y(Y) - click_y)
+  delta_x = signed(Get_block_x(x) - click_x) ' 记录鼠标位置与点击位置的相对方向
+  delta_y = signed(Get_block_y(y) - click_y)
   mouse_x = click_x: mouse_y = click_y ' 默认
   If Abs(delta_x) + Abs(delta_y) = 1 Then ' 如果在上下左右
     If exclude(delta_x, delta_y) = False Then ' 目标位置可放置棋子
@@ -208,7 +250,7 @@ Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y A
     If exclude(delta_x, 0) = True And exclude(0, delta_y) = False Then mouse_y = click_y + delta_y ' 若侧边被挡到
     If exclude(delta_x, 0) = False And exclude(0, delta_y) = True Then mouse_x = click_x + delta_x
     If exclude(delta_x, delta_y) = True And exclude(delta_x, 0) = False And exclude(0, delta_y) = False Then ' 若斜角不可放置而两边是空的
-      If Abs(click_x_ - X) > Abs(click_y_ - Y) Then ' x轴方向位移较大
+      If Abs(click_x_ - x) > Abs(click_y_ - y) Then ' x轴方向位移较大
         mouse_x = click_x + delta_x
       Else ' y轴方向位移较大
         mouse_y = click_y + delta_y
@@ -225,7 +267,7 @@ Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y A
   If Abs(click_y - mouse_y) = 1 Then print_height = output.square_width * 2 + output.gap Else print_height = output.square_width ' 计算绘制高度
   Call Print_Block(Form_main, print_x, print_y, print_width, print_height, style.block_line_width, style.block_color, style.block_line_color) ' 绘制
 End Sub
-Private Sub Form_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single) ' 释放鼠标按键
+Private Sub Form_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single) ' 释放鼠标按键
   Dim i As Integer, j As Integer, num As Integer
   Dim block_x As Integer, block_y As Integer
   Dim block_width As Integer, block_height As Integer
@@ -267,6 +309,7 @@ Private Sub Form_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As 
       If case_main.kind(0) <> 0 And Check_2x2_seat = False Then Call Clear_block(num)
     End If
   End If
+  Call Try_get_code
   Call Output_case(Form_main, case_main, output) ' 刷新显示界面
 End Sub
 Private Sub Clear_block(num As Integer) ' 根据编号清空棋子信息
@@ -327,6 +370,17 @@ End Function
 Private Function min(dat_1 As Integer, dat_2 As Integer) As Integer ' 返回较小的值
   If dat_1 > dat_2 Then min = dat_2 Else min = dat_1
 End Function
+Private Sub Init_case() ' 初始化布局
+  Dim i As Integer, j As Integer
+  For i = 0 To 14
+    case_main.kind(i) = 255
+  Next i
+  For i = 0 To 3
+    For j = 0 To 4
+      case_main.status(i, j) = 254
+    Next j
+  Next i
+End Sub
 Private Function Get_addr_x(num As Integer) As Integer ' 找到编号的左上角x坐标 编号为不存在则返回255
   Dim i As Integer, j As Integer
   Get_addr_x = 255
@@ -373,28 +427,3 @@ Private Function Get_block_y(dat As Single) As Single ' 计算鼠标位置所在对应棋盘
   If dat < output.gap Then Get_block_y = 0 ' 上越界
   dat = dat + output.start_y
 End Function
-
-Private Sub Text_Code_KeyPress(KeyAscii As Integer)
-  If KeyAscii = 13 Then Call Command_Print_Click
-End Sub
-
-Private Sub Timer1_Timer()
-  Dim i As Integer, j As Integer
-  Dim debug_dat As String
-  debug_dat = ""
-  For j = 0 To 4
-    For i = 0 To 3
-      If case_main.status(i, j) = 254 Then
-        debug_dat = debug_dat & "- "
-      Else
-        debug_dat = debug_dat & case_main.status(i, j) & " "
-      End If
-    Next i
-    debug_dat = debug_dat & vbCrLf
-  Next j
-  
-  For i = 0 To 14
-    debug_dat = debug_dat & Trim(i) & ": " & case_main.kind(i) & vbCrLf
-  Next i
-  Text_debug = debug_dat
-End Sub
