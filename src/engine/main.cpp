@@ -10,18 +10,17 @@
 using namespace std;
 
 ofstream File_Output;
-
 unsigned long long checked_code;
 
 bool code_check(string str) {
-	HRD_cal cal;
-	char code_str[10];
-	if (str.length() != 9) {
-		return false;
-	}
-	for (unsigned int i = 0; i < str.length(); i++) {
+    HRD_cal cal;
+    char code_str[10];
+    if (str.length() != 9) {
+        return false;
+    }
+    for (unsigned int i = 0; i < str.length(); i++) {
         code_str[i] = str[i];
-	}
+    }
     code_str[9] = '\0';
     checked_code = cal.Change_int(code_str);
     return cal.Check_Code(checked_code);
@@ -29,12 +28,12 @@ bool code_check(string str) {
 
 void show_case(string str) {
     unsigned long long code;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
-	code = checked_code;
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
     HRD_analy analy;
     char output_char[3] = "&%";
     cout << endl;
@@ -45,16 +44,16 @@ void show_case(string str) {
 
 void show_case(string str, string width) {
     unsigned long long code;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
-	code = checked_code;
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
     HRD_analy analy;
     int square_width;
     char output_char[3] = "&%";
-	istringstream is(width); // 借用字符串流对象将string转为int
+    istringstream is(width); // 借用字符串流对象将string转为int
     is >> square_width;
     cout << endl;
     cout << "Code: " << analy.Change_str(code) << endl;
@@ -65,11 +64,11 @@ void show_case(string str, string width) {
 void cal_case(string str) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_cal cal;
     code = checked_code;
     cout << "Start code: " << cal.Change_str(code) << endl;
@@ -88,11 +87,11 @@ void cal_case(string str) {
 void cal_case(string str, string File_name) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_cal cal;
     code = checked_code;
     cout << "Start code: " << cal.Change_str(code) << endl;
@@ -122,18 +121,18 @@ void cal_case(string str, string File_name) {
 void cal_target(string str_1, string str_2) {
     unsigned long long code, target;
     vector <unsigned long long> dat;
-	if (code_check(str_1) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
-	code = checked_code;
-	if (code_check(str_2) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
-	target = checked_code;
+    if (code_check(str_1) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    if (code_check(str_2) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    target = checked_code;
     HRD_cal cal;
     cout << "Start code: " << cal.Change_str(code) << endl;
     cout << "Target code: " << cal.Change_str(target) << endl;
@@ -152,18 +151,18 @@ void cal_target(string str_1, string str_2) {
 void cal_target(string str_1, string str_2, string File_name) {
     unsigned long long code, target;
     vector <unsigned long long> dat;
-	if (code_check(str_1) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
-	code = checked_code;
-	if (code_check(str_2) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
-	target = checked_code;
+    if (code_check(str_1) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    if (code_check(str_2) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    target = checked_code;
     HRD_cal cal;
     cout << "Start code: " << cal.Change_str(code) << endl;
     cout << "Target code: " << cal.Change_str(target) << endl;
@@ -193,11 +192,11 @@ void cal_target(string str_1, string str_2, string File_name) {
 void cal_group(string str) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_cal cal;
     code = checked_code;
     cout << "Start code: " << cal.Change_str(code) << endl;
@@ -209,11 +208,11 @@ void cal_group(string str) {
 void cal_group(string str, string File_name) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_cal cal;
     code = checked_code;
     cout << "Start code: " << cal.Change_str(code) << endl;
@@ -235,11 +234,11 @@ void cal_group(string str, string File_name) {
 void analy_case(string str, bool quiet) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_analy analy;
     code = checked_code;
     cout << "Start code: " << analy.Change_str(code) << endl;
@@ -252,11 +251,11 @@ void analy_case(string str, bool quiet) {
 void analy_case(string str, string File_name, bool quiet) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_analy analy;
     code = checked_code;
     cout << "Start code: " << analy.Change_str(code) << endl;
@@ -276,11 +275,11 @@ void analy_case(string str, string File_name, bool quiet) {
 void analy_group(string str, string File_name_1, string File_name_2, bool is_all) {
     unsigned long long code;
     vector <unsigned long long> dat;
-	if (code_check(str) == false) {
-		cout << "code error" << endl;
-		cout << endl;
-		return;
-	}
+    if (code_check(str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
     HRD_group group;
     code = checked_code;
     cout << "Start code: " << group.Change_str(code) << endl;
@@ -395,103 +394,103 @@ void parameter_err() {
 }
 
 int main(int argc, char* argv[]) {
-	cout << endl << "Klotski engine by Dnomd343" << endl;
-	if (argc <= 1) {
+    cout << endl << "Klotski engine by Dnomd343" << endl;
+    if (argc <= 1) {
         cout << "no parameter" << endl;
         cout << "You can try \"--help\" for more information" << endl;
         cout << endl;
         return 0;
-	}
-	string parameter;
-	parameter = argv[1];
-	if (parameter == "--show") {
+    }
+    string parameter;
+    parameter = argv[1];
+    if (parameter == "--show") {
         if (argc == 3) {
             show_case(argv[2]);
-		} else if (argc == 4) {
+        } else if (argc == 4) {
             show_case(argv[2], argv[3]);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--cal") {
-		if (argc == 3) {
+        }
+    } else if (parameter == "--cal") {
+        if (argc == 3) {
             cal_case(argv[2]);
-		} else if (argc == 4) {
+        } else if (argc == 4) {
             cal_case(argv[2], argv[3]);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--cal-target") {
-		if (argc == 4) {
+        }
+    } else if (parameter == "--cal-target") {
+        if (argc == 4) {
             cal_target(argv[2], argv[3]);
-		} else if (argc == 5) {
+        } else if (argc == 5) {
             cal_target(argv[2], argv[3], argv[4]);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--group") {
-		if (argc == 3) {
-		    cal_group(argv[2]);
+        }
+    } else if (parameter == "--group") {
+        if (argc == 3) {
+            cal_group(argv[2]);
         } else if (argc == 4) {
             cal_group(argv[2], argv[3]);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--analy") {
-	    if (argc == 3) {
+        }
+    } else if (parameter == "--analy") {
+        if (argc == 3) {
             analy_case(argv[2], false);
         } else if (argc == 4) {
             analy_case(argv[2], argv[3], false);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--analy-quiet") {
-		if (argc == 4) {
+        }
+    } else if (parameter == "--analy-quiet") {
+        if (argc == 4) {
             analy_case(argv[2], argv[3], true);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--analy-group") {
-		if (argc == 5) {
+        }
+    } else if (parameter == "--analy-group") {
+        if (argc == 5) {
             analy_group(argv[2], argv[3], argv[4], false);
-		} else {
+        } else {
             parameter_err();
-		}
+        }
     } else if (parameter == "--analy-group-integral") {
-		if (argc == 5) {
+        if (argc == 5) {
             analy_group(argv[2], argv[3], argv[4], true);
-		} else {
+        } else {
             parameter_err();
-		}
+        }
     } else if (parameter == "--analy-multi-group") {
-		if (argc == 5) {
+        if (argc == 5) {
             analy_multi_group(argv[2], argv[3], argv[4], false);
-		} else {
+        } else {
             parameter_err();
-		}
+        }
     } else if (parameter == "--analy-multi-group-integral") {
-		if (argc == 5) {
+        if (argc == 5) {
             analy_multi_group(argv[2], argv[3], argv[4], true);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--all") {
-		if (argc == 2) {
+        }
+    } else if (parameter == "--all") {
+        if (argc == 2) {
             find_all();
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--all-code") {
-		if (argc == 3) {
+        }
+    } else if (parameter == "--all-code") {
+        if (argc == 3) {
             find_all_code(argv[2]);
-		} else {
+        } else {
             parameter_err();
-		}
-	} else if (parameter == "--help") {
-		show_help();
-	} else {
-		cout << "unknow parameter" << endl;
+        }
+    } else if (parameter == "--help") {
+        show_help();
+    } else {
+        cout << "unknow parameter" << endl;
         cout << "You can try \"--help\" for more information" << endl;
         cout << endl;
     }
-	return 0;
+    return 0;
 }

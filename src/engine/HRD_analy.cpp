@@ -185,12 +185,12 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     unsigned int i, j, k;
     farthest_step = -1; // 初始化farthest
     farthest_num = 0;
-	farthest_case.clear();
+    farthest_case.clear();
     min_solution_step = -1; // 初始化min_solution
     min_solution_num = 0;
     min_solution_case.clear();
-	solution_num = 0; // 初始化solution
-	solution_case.clear();
+    solution_num = 0; // 初始化solution
+    solution_case.clear();
     solution_step.clear();
     if (Check_Code(code) == false) {return;} // 若编码错误则退出
     Calculate(code); // 计算分层数据
@@ -204,7 +204,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
         farthest_case.push_back((*Layer[farthest_step][i]).code);
     }
     farthest_num = farthest_case.size();
-	sort(farthest_case.begin(), farthest_case.end());  //得到的结果进行排序
+    sort(farthest_case.begin(), farthest_case.end());  //得到的结果进行排序
     // 获取最少步解
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
@@ -223,7 +223,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
         }
     }
     min_solution_num = min_solution_case.size();
-	sort(min_solution_case.begin(), min_solution_case.end()); // 得到的结果进行排序
+    sort(min_solution_case.begin(), min_solution_case.end()); // 得到的结果进行排序
     // 获取全部解
     vector <Case_cal *> case_list;
     solution_case = min_solution_case; // 同步最少步解到所有解序列中
@@ -239,20 +239,20 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
                 }
             }
         }
-		temp.clear();
+        temp.clear();
         for (j = 0; j < Layer[i + 1].size(); j++) { // 遍历下一层内元素
             if (solution_flag[i + 1][j] == false) { // 得到未被标识的元素
                 if (((*Layer[i + 1][j]).code >> 32) == 0xD) { // 若为解的布局
-					temp.push_back((*Layer[i + 1][j]).code); // 先加入到temp中方便排序
+                    temp.push_back((*Layer[i + 1][j]).code); // 先加入到temp中方便排序
                     solution_step.push_back(i + 1);
                     solution_flag[i + 1][j] = true; // 标识
                 }
             }
         }
-		sort(temp.begin(), temp.end()); // 将得到的结果进行排序
-		for (k = 0; k < temp.size(); k++) { // 将temp内容加入solution_case中
-			solution_case.push_back(temp[k]);
-		}
+        sort(temp.begin(), temp.end()); // 将得到的结果进行排序
+        for (k = 0; k < temp.size(); k++) { // 将temp内容加入solution_case中
+            solution_case.push_back(temp[k]);
+        }
     }
     solution_num = solution_case.size();
     if (quiet == true) {return;} // 若quiet为true则不输出
@@ -692,6 +692,6 @@ unsigned long long HRD_analy::Change_int (char *str) { // 将文本编码转化�
         } else if (str[i] >= 97 && str[i] <= 102) { // a ~ f
             dat |= str[i] - 87;
         }
-	}
+    }
     return dat;
 }

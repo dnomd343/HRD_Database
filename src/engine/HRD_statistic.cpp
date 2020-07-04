@@ -232,4 +232,3 @@ void HRD_statistic::Find_All_Case() { // 找到所有编码
     }
     cout << "Total: " << num << endl;
 }
-

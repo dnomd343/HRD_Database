@@ -467,6 +467,6 @@ unsigned long long HRD_cal::Change_int (char *str) { // 将文本编码转化为
         } else if (str[i] >= 97 && str[i] <= 102) { // a ~ f
             dat |= str[i] - 87;
         }
-	}
+    }
     return dat;
 }

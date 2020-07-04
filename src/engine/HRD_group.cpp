@@ -469,7 +469,6 @@ bool HRD_group::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析�
     x = Code % 4;
     y = Code / 4;
     dat.status[x][y] = dat.status[x + 1][y] = dat.status[x][y + 1] = dat.status[x + 1][y + 1] = 0;
-
     num = x = y = 0;
     for (i = 0; i < 16; i++) {
         while (dat.status[x][y] != 0xFF) { // 找到下一个未填入的位置
@@ -538,6 +537,6 @@ unsigned long long HRD_group::Change_int(char *str) { // 将文本编码转化�
         } else if (str[i] >= 97 && str[i] <= 102) { // a ~ f
             dat |= str[i] - 87;
         }
-	}
+    }
     return dat;
 }
