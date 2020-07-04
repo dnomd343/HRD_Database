@@ -26,7 +26,7 @@ class HRD_statistic {
             unsigned int group_num;
             unsigned int group_index;
         };
-        vector <Case *> All_Case; // ¼ÇÂ¼ËùÓĞ²¼¾ÖµÄĞÅÏ¢
+        vector <Case *> All_Case; // è®°å½•æ‰€æœ‰å¸ƒå±€çš„ä¿¡æ¯
 
         void Get_seed();
         void Find_All_Case();

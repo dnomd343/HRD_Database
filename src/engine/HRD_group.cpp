@@ -246,7 +246,7 @@ vector <unsigned long long> HRD_group::Find_Next_Case(unsigned long long Code) {
                 }
             }
             addr[x][y] = true; // 加入当前块 防止重复查询
-            num = dat.status[x][y]; // 统一修改(x, y)块 减少代码量
+            num = dat.status[x][y]; // 统一修改(x, y)块
             dat.status[x][y] = 0xFE;
             switch (dat.type[num]) {
                 case 0: // 2 * 2

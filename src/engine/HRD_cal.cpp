@@ -159,7 +159,7 @@ void HRD_cal::Find_Next_Case(Case_cal &dat_raw) { // 找到下一步移动的情
     for (y = 0; y < 5; y++) { // 遍历整个棋盘
         for (x = 0; x < 4; x++) {
             if (dat_raw.freeze[x][y] == true) {continue;} // 遇到freeze为true的跳过
-            num = dat.status[x][y]; // 统一修改(x, y)块 减少代码量
+            num = dat.status[x][y]; // 统一修改(x, y)块
             dat.status[x][y] = 0xFE;
             dat.freeze[x][y] = true;
             for (i = 0; i < 4; i++) { // 初始化

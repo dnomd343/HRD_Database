@@ -54,7 +54,7 @@ void show_case(string str, string width) {
     HRD_analy analy;
     int square_width;
     char output_char[3] = "&%";
-	istringstream is(width); // 借用字符串流对象将string转为int
+	istringstream is(width); // 鍊熺敤瀛楃涓叉祦瀵硅薄灏唖tring杞负int
     is >> square_width;
     cout << endl;
     cout << "Code: " << analy.Change_str(code) << endl;
@@ -320,7 +320,7 @@ void find_all_code(string File_name) {
 }
 
 void show_help() {
-    cout << "(version: v0.0)" << endl;
+    cout << "(version: v0.1)" << endl;
     cout << "Usage of HRD_engine:" << endl;
     cout << endl;
     cout << "  --show <code> [square_width]" << endl;
@@ -395,7 +395,7 @@ void parameter_err() {
 }
 
 int main(int argc, char* argv[]) {
-	cout << "Klotski engine by Dnomd343" << endl;
+	cout << endl << "Klotski engine by Dnomd343" << endl;
 	if (argc <= 1) {
         cout << "no parameter" << endl;
         cout << "You can try \"--help\" for more information" << endl;
