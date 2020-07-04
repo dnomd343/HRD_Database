@@ -1,17 +1,17 @@
 Attribute VB_Name = "Module"
 Option Explicit
 Type Case_detail
-  status(0 To 3, 0 To 4) As Integer '255 -> undefined ; 254 -> space
+  status(0 To 3, 0 To 4) As Integer ' 255 -> undefined ; 254 -> space
   kind(0 To 14) As Integer ' 0 -> 2 * 2 ; 1 -> 2 * 1 ; 2 -> 1 * 2 ; 3 -> 1 * 1
   code As String ' length -> 9
 End Type
-Type Case_size
+Type Case_size ' 记录棋盘的大小
   start_x As Integer
   start_y As Integer
   square_width As Integer
   gap As Integer
 End Type
-Type Case_style
+Type Case_style ' 记录显示的颜色与边框粗细
   block_line_width As Integer
   case_line_width As Integer
   block_line_color As OLE_COLOR
@@ -19,11 +19,31 @@ Type Case_style
   block_color As OLE_COLOR
   case_color As OLE_COLOR
 End Type
-Public Parse_data As Case_detail
-Public style As Case_style
-
-Sub main()
+Public Parse_data As Case_detail ' 解析编码的返回数据
+Public style As Case_style ' 通用显示样式
+Sub main() ' 程序入口
   Form_main.Show
+End Sub
+Sub case_debug()
+  Dim X, Y, i As Integer
+  Dim debug_dat As String
+  For Y = 0 To 4
+    For X = 0 To 3
+      If Parse_data.status(X, Y) = 254 Then
+        debug_dat = debug_dat & "- "
+      ElseIf Parse_data.status(X, Y) = 255 Then
+        debug_dat = debug_dat & "? "
+      Else
+        debug_dat = debug_dat & change_str(Parse_data.status(X, Y)) & " "
+      End If
+    Next X
+    debug_dat = debug_dat & vbCrLf
+  Next Y
+  debug_dat = debug_dat & vbCrLf
+  For i = 0 To 14
+    debug_dat = debug_dat & i & ": " & Parse_data.kind(i) & vbCrLf
+  Next i
+  MsgBox debug_dat
 End Sub
 Public Sub Output_case(obj, case_data As Case_detail, case_output As Case_size) ' 将输入的布局显示到obj上
   Dim i As Integer, X As Integer, Y As Integer
@@ -75,27 +95,6 @@ Public Sub Print_Block(obj, print_start_x, print_start_y, print_width, print_hei
   obj.FillColor = print_color
   obj.Line (print_start_x, print_start_y)-(print_start_x + print_width, print_start_y + print_height), print_color, B
   obj.Line (print_start_x, print_start_y)-(print_start_x + print_width, print_start_y + print_height), print_line_color, B
-End Sub
-Sub case_debug()
-  Dim X, Y, i As Integer
-  Dim debug_dat As String
-  For Y = 0 To 4
-    For X = 0 To 3
-      If Parse_data.status(X, Y) = 254 Then
-        debug_dat = debug_dat & "- "
-      ElseIf Parse_data.status(X, Y) = 255 Then
-        debug_dat = debug_dat & "? "
-      Else
-        debug_dat = debug_dat & change_str(Parse_data.status(X, Y)) & " "
-      End If
-    Next X
-    debug_dat = debug_dat & vbCrLf
-  Next Y
-  debug_dat = debug_dat & vbCrLf
-  For i = 0 To 14
-    debug_dat = debug_dat & i & ": " & Parse_data.kind(i) & vbCrLf
-  Next i
-  MsgBox debug_dat
 End Sub
 Function change_str(dat As Integer) As String ' 输入一个十六进制位 转化为字符串返回
   If dat <= 9 And dat >= 0 Then
