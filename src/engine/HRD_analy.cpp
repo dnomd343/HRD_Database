@@ -530,7 +530,8 @@ void HRD_analy::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5
     Add_Case(dat_mod); // 发送给Add_Case
     Find_Sub_Case(dat, num, x, y, addr); // 递归搜索
 }
-bool HRD_analy::Is_Mirror(unsigned long long code) {
+
+bool HRD_analy::Is_Mirror(unsigned long long code) { // 判断布局是否左右对称
     Case_cal dat;
     Parse_Code(dat, code);
     for (int j = 0; j < 5; j++) {
@@ -547,7 +548,7 @@ bool HRD_analy::Is_Mirror(unsigned long long code) {
     return true;
 }
 
-bool HRD_analy::Check_Code(unsigned long long code) { // 判断布局是否左右对称
+bool HRD_analy::Check_Code(unsigned long long code) {
     Case_cal dat;
     return Parse_Code(dat, code);
 }
