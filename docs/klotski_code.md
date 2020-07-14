@@ -4,7 +4,7 @@
 
 **位置编号**
 
-![address](./docs/images/address.png)
+![address](./images/address.png)
 
 2 x 2棋子的左上角在棋盘中的位置编号有12种情况，对应编码分别为：0、1、2、4、5、6、8、9、A(10)、C(12)、D(13)、E(14)，将其置于编码第一位；剩余8位十六进制位储存其他棋子信息。
 
@@ -46,7 +46,7 @@
 
 **例1：**
 
-![eg-1A9BF0C00](./docs/images/code_eg_1.png)
+![eg-1A9BF0C00](./images/code_eg_1.png)
 
 <table style="text-align: center">
 	<tr>
@@ -99,7 +99,7 @@
 
 **例2：**
 
-![eg-4FEA13400](./docs/images/code_eg_2.png)
+![eg-4FEA13400](./images/code_eg_2.png)
 
 <table style="text-align: center">
 	<tr>
@@ -152,7 +152,7 @@
 
 **例3：**
 
-![eg-5DC02F800](./docs/images/code_eg_3.png)
+![eg-5DC02F800](./images/code_eg_3.png)
 
 <table style="text-align: center">
 	<tr>

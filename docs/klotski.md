@@ -24,16 +24,16 @@
 
 ### 合法布局举例：
 
-![legal_1+2](./docs/images/legal_1+2.png)
+![legal_1+2](./images/legal_1+2.png)
 
-![legal_3+4](./docs/images/legal_3+4.png)
+![legal_3+4](./images/legal_3+4.png)
 
 
 ### 非法布局举例：
 
-![illegal_1+2](./docs/images/illegal_1+2.png)
+![illegal_1+2](./images/illegal_1+2.png)
 
-![illegal_3+4](./docs/images/illegal_3+4.png)
+![illegal_3+4](./images/illegal_3+4.png)
 
 
 **错误原因：**
@@ -63,11 +63,11 @@
 
 ### 步的举例
 
-![step_eg_1.png](./docs/images/step_eg_1.png)
+![step_eg_1.png](./images/step_eg_1.png)
 
-![step_eg_2.png](./docs/images/step_eg_2.png)
+![step_eg_2.png](./images/step_eg_2.png)
 
-![step_eg_3.png](./docs/images/step_eg_3.png)
+![step_eg_3.png](./images/step_eg_3.png)
 
 
 
@@ -92,7 +92,7 @@
 
 由上文性质2可知，群中任一布局进过多次移动可复原出整个群，故描述一个群仅需其中一个布局，常取其中编码最小的布局进行记录；
 
-[25422个群的种子](./res/seed.zip)
+[25422个群的种子](../res/seed.zip)
 
 
 
