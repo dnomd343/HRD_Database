@@ -61,24 +61,24 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
     vector <Case *> List_hash[0x10000]; // 哈希索引
     for (i = 0; i < dat.size(); i++) { // 将数据注入到List中
         Case *temp = new Case;
-        (*temp).Code = dat[i];
+        temp->Code = dat[i];
         List.push_back(temp);
     }
     for (i = 0; i < List.size(); i++) { // 构建哈希索引表
-        hash_index = 0xffff & ((*List[i]).Code >> 16);
+        hash_index = 0xffff & (List[i]->Code >> 16);
         List_hash[hash_index].push_back(List[i]);
     }
     for (i = 0; i < List.size(); i++) { // 计算全部2 * 2块的位置
-        (*List[i]).addr_2x2 = (*List[i]).Code >> 32;
+        List[i]->addr_2x2 = List[i]->Code >> 32;
     }
     vector <unsigned long long> next_code;
     for (i = 0; i < List.size(); i++) { // 构建关系网
-        next_code = Find_Next_Case((*List[i]).Code); // 找到全部子布局
+        next_code = Find_Next_Case(List[i]->Code); // 找到全部子布局
         for (j = 0; j < next_code.size(); j++) { // 遍历子布局
             hash_index = 0xffff & (next_code[j] >> 16); // 取得哈希索引
             for (k = 0; List_hash[hash_index].size(); k++) { // 搜索该索引
-                if ((*List_hash[hash_index][k]).Code == next_code[j]) { // 找到目标
-                    (*List[i]).Next.push_back(List_hash[hash_index][k]); // 链接目标位置
+                if (List_hash[hash_index][k]->Code == next_code[j]) { // 找到目标
+                    List[i]->Next.push_back(List_hash[hash_index][k]); // 链接目标位置
                     break; // 退出循环
                 }
             }
@@ -87,8 +87,8 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
     Case_detail *result;
     for(i = 0; i < List.size(); i++) { // 遍历整个队列
         for (k = 0; k < List.size(); k++) { // 初始化
-            (*List[k]).Layer_num = -1;
-            (*List[k]).Flag = false;
+            List[k]->Layer_num = -1;
+            List[k]->Flag = false;
         }
         result = Analyse_Case(List[i]); // 计算对应布局数据并储存到result中
         Output_detail(result);
@@ -105,36 +105,36 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
 void HRD_group::Output_detail(Case_detail *dat) {
     unsigned int i;
     // farthest
-    output_farthest << Change_str((*dat).code) << ",";
-    output_farthest << (*dat).farthest_step << ",";
-    output_farthest << (*dat).farthest_num << ",";
-    for (i = 0; i < (*dat).farthest_case.size(); i++) {
-        output_farthest << Change_str((*dat).farthest_case[i]);
-        if (i + 1 != (*dat).farthest_case.size()) {
+    output_farthest << Change_str(dat->code) << ",";
+    output_farthest << dat->farthest_step << ",";
+    output_farthest << dat->farthest_num << ",";
+    for (i = 0; i < dat->farthest_case.size(); i++) {
+        output_farthest << Change_str(dat->farthest_case[i]);
+        if (i + 1 != dat->farthest_case.size()) {
             output_farthest << "-";
         }
     }
     output_farthest << endl;
     // solution
-    output_solution << Change_str((*dat).code) << ",";
-    output_solution << (*dat).min_solution_step << ",";
-    output_solution << (*dat).min_solution_num << ",";
-    for (i = 0; i < (*dat).min_solution_case.size(); i++) {
-        output_solution << Change_str((*dat).min_solution_case[i]);
-        if (i + 1 != (*dat).min_solution_case.size()) {
+    output_solution << Change_str(dat->code) << ",";
+    output_solution << dat->min_solution_step << ",";
+    output_solution << dat->min_solution_num << ",";
+    for (i = 0; i < dat->min_solution_case.size(); i++) {
+        output_solution << Change_str(dat->min_solution_case[i]);
+        if (i + 1 != dat->min_solution_case.size()) {
             output_solution << "-";
         }
     }
-    output_solution << "," << (*dat).solution_num;
+    output_solution << "," << dat->solution_num;
     if (!Output_solution_case) {
         output_solution << endl;
         return;
     }
     output_solution << ",";
-    for (i = 0; i < (*dat).solution_case.size(); i++) {
-        output_solution << Change_str((*dat).solution_case[i]);
-        output_solution << "(" << (*dat).solution_step[i] << ")";
-        if (i + 1 != (*dat).solution_case.size()) {
+    for (i = 0; i < dat->solution_case.size(); i++) {
+        output_solution << Change_str(dat->solution_case[i]);
+        output_solution << "(" << dat->solution_step[i] << ")";
+        if (i + 1 != dat->solution_case.size()) {
             output_solution << "-";
         }
     }
@@ -146,63 +146,63 @@ HRD_group::Case_detail* HRD_group::Analyse_Case(Case *start) { // 根据关系�
     vector <Case *> case_list;
     Case_detail *dat = new Case_detail; // dat储存分析结果
     Case_detail_init(*dat); // 初始化
-    (*dat).code = (*start).Code;
-    (*start).Layer_num = 0; //令入口节点的层级为0
+    dat->code = start->Code;
+    start->Layer_num = 0; //令入口节点的层级为0
     case_list.push_back(start); // 加入队列中
     i = 0;
     while (i != case_list.size()) { // 找到所有元素后退出
         if ((*case_list[i]).addr_2x2 == 0xD) { // 2 * 2块在出口位置
-            if (!(*case_list[i]).Flag) { // 未被标识
-                (*dat).solution_case.push_back((*case_list[i]).Code); // 判定为解
-                (*dat).solution_step.push_back((*case_list[i]).Layer_num);
-                (*case_list[i]).Flag = true; // 进行标识
+            if (!case_list[i]->Flag) { // 未被标识
+                dat->solution_case.push_back(case_list[i]->Code); // 判定为解
+                dat->solution_step.push_back(case_list[i]->Layer_num);
+                case_list[i]->Flag = true; // 进行标识
             }
         }
-        for (k = 0; k < (*case_list[i]).Next.size(); k++) { // 检测目标布局的全部子布局
-            if ((*(*case_list[i]).Next[k]).Layer_num == -1) { // 若之前还未被搜索到
-                (*(*case_list[i]).Next[k]).Layer_num = (*case_list[i]).Layer_num + 1; // 记录层级信息
-                case_list.push_back((*case_list[i]).Next[k]); // 加入搜索队列
+        for (k = 0; k < case_list[i]->Next.size(); k++) { // 检测目标布局的全部子布局
+            if ((*case_list[i]->Next[k]).Layer_num == -1) { // 若之前还未被搜索到
+                (*case_list[i]->Next[k]).Layer_num = case_list[i]->Layer_num + 1; // 记录层级信息
+                case_list.push_back(case_list[i]->Next[k]); // 加入搜索队列
             }
-            if ((*case_list[i]).Flag) { // 若已经标识 则感染下一层的子布局
-                if ((*(*case_list[i]).Next[k]).Layer_num == (*case_list[i]).Layer_num + 1) { // 若为下一层
-                    (*(*case_list[i]).Next[k]).Flag = true; // 标识
+            if (case_list[i]->Flag) { // 若已经标识 则感染下一层的子布局
+                if ((*case_list[i]->Next[k]).Layer_num == case_list[i]->Layer_num + 1) { // 若为下一层
+                    (*case_list[i]->Next[k]).Flag = true; // 标识
                 }
             }
         }
         i++; // 搜索下一个布局
     }
     // 计算最远布局
-    (*dat).farthest_step = (*case_list[case_list.size() - 1]).Layer_num; // 得到最远步数
+    dat->farthest_step = case_list[case_list.size() - 1]->Layer_num; // 得到最远步数
     for (int i = case_list.size() - 1; i >= 0; i--) { // 逆向搜索
-        if ((*case_list[i]).Layer_num == (*dat).farthest_step) { // 如果是最远布局
-            (*dat).farthest_case.push_back((*case_list[i]).Code); // 加入记录
+        if (case_list[i]->Layer_num == dat->farthest_step) { // 如果是最远布局
+            dat->farthest_case.push_back(case_list[i]->Code); // 加入记录
         } else {
             break; // 退出搜索
         }
     }
-    (*dat).farthest_num = (*dat).farthest_case.size(); // 得到最远布局的个数
-    sort((*dat).farthest_case.begin(), (*dat).farthest_case.end());
+    dat->farthest_num = dat->farthest_case.size(); // 得到最远布局的个数
+    sort(dat->farthest_case.begin(), dat->farthest_case.end());
     // 计算解的情况
-    (*dat).solution_num = (*dat).solution_case.size(); // 得到解的个数
+    dat->solution_num = dat->solution_case.size(); // 得到解的个数
     int step = -1;
     vector < vector <unsigned long long> > temp; // 暂存不同步数解的信息
-    for (i = 0; i < (*dat).solution_step.size(); i++) { // 遍历全部解
-        if (step != int((*dat).solution_step[i])) { // 发现步数不同
+    for (i = 0; i < dat->solution_step.size(); i++) { // 遍历全部解
+        if (step != int(dat->solution_step[i])) { // 发现步数不同
             temp.resize(temp.size() + 1); // temp扩容
-            step = (*dat).solution_step[i]; // 重置步数
+            step = dat->solution_step[i]; // 重置步数
         }
-        temp[temp.size() - 1].push_back((*dat).solution_case[i]); // 数据加入到temp中
+        temp[temp.size() - 1].push_back(dat->solution_case[i]); // 数据加入到temp中
     }
-    (*dat).solution_case.clear(); // 清空原数据
+    dat->solution_case.clear(); // 清空原数据
     for (i = 0; i < temp.size(); i++) { // 将排序后的数据重新写入
         sort(temp[i].begin(), temp[i].end()); // 排序同一步数的不同解
         if (i == 0) { // 若为最少步数
-            (*dat).min_solution_case = temp[0]; // 记录最少步解的布局
-            (*dat).min_solution_num = temp[0].size(); // 记录最少步解的个数
-            (*dat).min_solution_step = (*dat).solution_step[0]; // 记录最少步数
+            dat->min_solution_case = temp[0]; // 记录最少步解的布局
+            dat->min_solution_num = temp[0].size(); // 记录最少步解的个数
+            dat->min_solution_step = (*dat).solution_step[0]; // 记录最少步数
         }
         for (k = 0; k < temp[i].size(); k++) {
-            (*dat).solution_case.push_back(temp[i][k]); // 写入数据
+            dat->solution_case.push_back(temp[i][k]); // 写入数据
         }
     }
     return dat;

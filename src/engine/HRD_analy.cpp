@@ -66,22 +66,16 @@ void HRD_analy::Output_Graph(unsigned long long Code, unsigned int square_width,
     }
     width = temp.size();
     height = temp[0].size();
-    for (x = 0; x < width + square_gap * 2 + 2; x++) {
-        cout << str;
-    }
+    for (x = 0; x < width + square_gap * 2 + 2; x++) {cout << str;}
     cout << endl;
     for (y = 0; y < square_gap; y++) {
         cout << str;
-        for (x = 0; x < width + square_gap * 2; x++) {
-            cout << "  ";
-        }
+        for (x = 0; x < width + square_gap * 2; x++) {cout << "  ";}
         cout << str << endl;
     }
     for (y = 0; y < height; y++) {
         cout << str;
-        for (x = 0; x < square_gap; x++) {
-            cout << "  ";
-        }
+        for (x = 0; x < square_gap; x++) {cout << "  ";}
         for (x = 0; x < width; x++) {
             if (temp[x][y]) {
                 cout << str;
@@ -89,28 +83,21 @@ void HRD_analy::Output_Graph(unsigned long long Code, unsigned int square_width,
                 cout << "  ";
             }
         }
-        for (x = 0; x < square_gap; x++) {
-            cout << "  ";
-        }
+        for (x = 0; x < square_gap; x++) {cout << "  ";}
         cout << str << endl;
     }
     for (y = 0; y < square_gap; y++) {
         cout << str;
-        for (x = 0; x < width + square_gap * 2; x++) {
-            cout << "  ";
-        }
+        for (x = 0; x < width + square_gap * 2; x++) {cout << "  ";}
         cout << str << endl;
     }
-    for (x = 0; x < width + square_gap * 2 + 2; x++) {
-        cout << str;
-    }
+    for (x = 0; x < width + square_gap * 2 + 2; x++) {cout << str;}
     cout << endl;
 }
 
 void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     unsigned int i, j, k;
     ofstream output;
-    vector <Case_cal *> case_list;
     if (!quiet) {
         cout << "Output into: " << File_name << "...";
     }
@@ -145,18 +132,19 @@ void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     output << "[Layer]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
-            output << "(" << i << "," << j << ") -> ";
+            output << "(" << i << "," << j << ") = ";
             output << Change_str((*Layer[i][j]).code) << endl;
         }
     }
+    vector <Case_cal *> *case_list;
     output << "[Next]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
-            case_list = (*(*Layer[i][j]).adjacent).next_case;
+            case_list = Layer[i][j]->next_case;
             output << "(" << i << "," << j << ") ->";
-            for (k = 0; k < case_list.size(); k++) {
-                output << " (" << (*case_list[k]).layer_num;
-                output << "," << (*case_list[k]).layer_index << ")";
+            for (k = 0; k < case_list->size(); k++) {
+                output << " (" << (*case_list->at(k)).layer_num;
+                output << "," << (*case_list->at(k)).layer_index << ")";
             }
             output << endl;
         }
@@ -164,19 +152,17 @@ void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     output << "[Source]" << endl;
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
-            case_list = (*(*Layer[i][j]).adjacent).source_case;
+            case_list = Layer[i][j]->source_case;
             output << "(" << i << "," << j << ") <-";
-            for (k = 0; k < case_list.size(); k++) {
-                output << " (" << (*case_list[k]).layer_num;
-                output << "," << (*case_list[k]).layer_index << ")";
+            for (k = 0; k < case_list->size(); k++) {
+                output << " (" << (*case_list->at(k)).layer_num;
+                output << "," << (*case_list->at(k)).layer_index << ")";
             }
             output << endl;
         }
     }
     output.close();
-    if (!quiet) {
-        cout << "done" << endl;
-    }
+    if (!quiet) {cout << "done" << endl;}
 }
 
 void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的各种参数
@@ -208,7 +194,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     // 获取最少步解
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
-            if (((*Layer[i][j]).code >> 32) == 0xD) { // 2 * 2块在出口位置
+            if ((Layer[i][j]->code >> 32) == 0xD) { // 2 * 2块在出口位置
                 min_solution_step = i; // 找到最少步数
                 j = Layer[i].size(); // 跳出两层循环
                 i = Layer.size();
@@ -217,7 +203,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     }
     if (min_solution_step == -1) {return;} // 无解则退出
     for (i = 0; i < Layer[min_solution_step].size(); i++) { // 遍历最少步所在层
-        if (((*Layer[min_solution_step][i]).code >> 32) == 0xD) { // 判断是否为解
+        if ((Layer[min_solution_step][i]->code >> 32) == 0xD) { // 判断是否为解
             min_solution_case.push_back((*Layer[min_solution_step][i]).code); // 加入最少步解序列中
             solution_flag[min_solution_step][i] = true; // 标识
         }
@@ -225,7 +211,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     min_solution_num = min_solution_case.size();
     sort(min_solution_case.begin(), min_solution_case.end()); // 得到的结果进行排序
     // 获取全部解
-    vector <Case_cal *> case_list;
+    vector <Case_cal *> *case_list;
     solution_case = min_solution_case; // 同步最少步解到所有解序列中
     for (i = 0; i < solution_case.size(); i++) { // 初始化已知部分的solution_step
         solution_step.push_back(min_solution_step);
@@ -233,17 +219,17 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     for (i = 0; i < Layer.size() - 1; i++) { // 遍历除最后一层外的所有层
         for (j = 0; j < Layer[i].size(); j++) { // 遍历层内元素
             if (solution_flag[i][j]) { // 若该元素被标识
-                case_list = (*(*Layer[i][j]).adjacent).next_case;
-                for (k = 0; k < case_list.size(); k++) { // 遍历其下一步
-                    solution_flag[i + 1][(*case_list[k]).layer_index] = true; // 标识
+                case_list = Layer[i][j]->next_case;
+                for (k = 0; k < case_list->size(); k++) { // 遍历其下一步
+                    solution_flag[i + 1][(*case_list->at(k)).layer_index] = true; // 标识
                 }
             }
         }
         temp.clear();
         for (j = 0; j < Layer[i + 1].size(); j++) { // 遍历下一层内元素
             if (!solution_flag[i + 1][j]) { // 得到未被标识的元素
-                if (((*Layer[i + 1][j]).code >> 32) == 0xD) { // 若为解的布局
-                    temp.push_back((*Layer[i + 1][j]).code); // 先加入到temp中方便排序
+                if ((Layer[i + 1][j]->code >> 32) == 0xD) { // 若为解的布局
+                    temp.push_back(Layer[i + 1][j]->code); // 先加入到temp中方便排序
                     solution_step.push_back(i + 1);
                     solution_flag[i + 1][j] = true; // 标识
                 }
@@ -255,6 +241,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
         }
     }
     solution_num = solution_case.size();
+
     if (quiet) {return;} // 若quiet为true则不输出
     cout << "---------------------------" << endl;
     cout << "farthest_step = " << farthest_step << endl;
@@ -283,7 +270,8 @@ void HRD_analy::Free_Data() { // 释放上一次的计算结果
     unsigned int i, j;
     for (i = 0; i < Layer.size(); i++) { // 释放Layer中指向的全部节点
         for (j = 0; j < Layer[i].size(); j++) {
-            delete (*Layer[i][j]).adjacent;
+            delete Layer[i][j]->source_case;
+            delete Layer[i][j]->next_case;
             delete Layer[i][j];
         }
     }
@@ -294,18 +282,20 @@ void HRD_analy::Free_Data() { // 释放上一次的计算结果
 }
 
 void HRD_analy::Calculate(unsigned long long code) {
-    Free_Data(); // 初始化数据结构
+    Free_Data(); // 初始化
     Case_cal *start = new Case_cal;
-    (*start).adjacent = new Case_near;
+    start->source_case = new vector <Case_cal *>;
+    start->next_case = new vector <Case_cal *>;
     if (!Parse_Code(*start, code)) { // 若输入编码错误 退出
-        delete (*start).adjacent;
+        delete start->source_case;
+        delete start->next_case;
         delete start;
         return;
     }
     Layer.resize(1); // 创建第0层
     Layer[0].push_back(start); // 加入根节点
-    (*start).layer_num = (*start).layer_index = 0; // 初始化根节点编号
-    Layer_hash[0xffff & ((*start).code >> 16)].push_back(start); // 根节点加入哈希表
+    start->layer_num = start->layer_index = 0; // 初始化根节点编号
+    Layer_hash[0xffff & (start->code >> 16)].push_back(start); // 根节点加入哈希表
     now_move_num = now_move_index = 0; // 从根节点开始运算
     while (1 == 1) { // 创建死循环
         if (now_move_index == 0) { // 若在计算层的第一个元素
@@ -332,17 +322,17 @@ void HRD_analy::Calculate(unsigned long long code) {
 void HRD_analy::Add_Case(Case_cal *dat) { // 将计算得到的节点加入层级中
     unsigned int i, x, y;
     Case_cal *repeat_case;
-    int hash_index = 0xffff & ((*dat).code >> 16); // 取得哈希索引
+    int hash_index = 0xffff & (dat->code >> 16); // 取得哈希索引
     for (i = 0; i < Layer_hash[hash_index].size(); i++) { // 遍历索引内容
         repeat_case = Layer_hash[hash_index][i];
-        if ((*repeat_case).code == (*dat).code) { // 发现重复
-            if ((*repeat_case).layer_num == now_move_num + 1) { // 若发现的目标比现在多一层
-                (*(*repeat_case).adjacent).source_case.push_back(now_move_case); // 记录父节点信息
-                (*(*now_move_case).adjacent).next_case.push_back(repeat_case); // 记录子节点信息
+        if (repeat_case->code == dat->code) { // 发现重复
+            if (repeat_case->layer_num == now_move_num + 1) { // 若发现的目标比现在多一层
+                (*repeat_case->source_case).push_back(now_move_case); // 记录父节点信息
+                (*now_move_case->next_case).push_back(repeat_case); // 记录子节点信息
                 for (x = 0; x < 4; x++) { // 遍历freeze表
                     for (y = 0; y < 5; y++) {
-                        if ((*dat).freeze[x][y]) { // 将输入表合并到原先的表上
-                            (*repeat_case).freeze[x][y] = true;
+                        if (dat->freeze[x][y]) { // 将输入表合并到原先的表上
+                            repeat_case->freeze[x][y] = true;
                         }
                     }
                 }
@@ -351,11 +341,12 @@ void HRD_analy::Add_Case(Case_cal *dat) { // 将计算得到的节点加入层�
             return; // 退出
         }
     }
-    (*dat).adjacent = new Case_near; // 初始化节点的相邻布局结构
-    (*(*dat).adjacent).source_case.push_back(now_move_case); // 记录父节点信息
-    (*(*now_move_case).adjacent).next_case.push_back(dat); // 记录子节点信息
-    (*dat).layer_num = now_move_num + 1; // 记录节点的层编号
-    (*dat).layer_index = Layer[now_move_num + 1].size(); // 记录节点在层中的编号
+    dat->source_case = new vector <Case_cal *>;
+    dat->next_case = new vector <Case_cal *>;
+    (*dat->source_case).push_back(now_move_case); // 记录父节点信息
+    (*now_move_case->next_case).push_back(dat); // 记录子节点信息
+    dat->layer_num = now_move_num + 1; // 记录节点的层编号
+    dat->layer_index = Layer[now_move_num + 1].size(); // 记录节点在层中的编号
     Layer[now_move_num + 1].push_back(dat); // 加入层级结构中
     Layer_hash[hash_index].push_back(dat); // 加入哈希索引
 }
@@ -522,25 +513,41 @@ void HRD_analy::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5
     *dat_mod = dat;
     switch ((*dat_mod).type[num]) { // 注入移动后的信息
         case 0: // 2 * 2
-            (*dat_mod).status[x][y] = (*dat_mod).status[x][y + 1]
-                = (*dat_mod).status[x + 1][y] = (*dat_mod).status[x + 1][y + 1] = num;
+            dat_mod->status[x][y] = dat_mod->status[x][y + 1]
+                = dat_mod->status[x + 1][y] = dat_mod->status[x + 1][y + 1] = num;
             break;
         case 1: // 2 * 1
-            (*dat_mod).status[x][y] = (*dat_mod).status[x + 1][y] = num;
+            dat_mod->status[x][y] = dat_mod->status[x + 1][y] = num;
             break;
         case 2: // 1 * 2
-            (*dat_mod).status[x][y] = (*dat_mod).status[x][y + 1] = num;
+            dat_mod->status[x][y] = dat_mod->status[x][y + 1] = num;
             break;
         case 3: // 1 * 1
-            (*dat_mod).status[x][y] = num;
+            dat_mod->status[x][y] = num;
             break;
     }
     Get_Code(*dat_mod); // 更新移动后的编码
     Add_Case(dat_mod); // 发送给Add_Case
     Find_Sub_Case(dat, num, x, y, addr); // 递归搜索
 }
+bool HRD_analy::Is_Mirror(unsigned long long code) {
+    Case_cal dat;
+    Parse_Code(dat, code);
+    for (int j = 0; j < 5; j++) {
+        for (int i = 0; i < 2; i++) {
+            if (dat.status[i][j] == 0xFF) { // undefined
+                return false; // 编码有误
+            } else if (dat.status[i][j] == 0xFE) { // space
+                if (dat.status[3 - i][j] != 0xFE) {return false;} // 不对称
+            } else {
+                if (dat.type[dat.status[i][j]] != dat.type[dat.status[3 - i][j]]) {return false;} // 不对称
+            }
+        }
+    }
+    return true;
+}
 
-bool HRD_analy::Check_Code(unsigned long long code) {
+bool HRD_analy::Check_Code(unsigned long long code) { // 判断布局是否左右对称
     Case_cal dat;
     return Parse_Code(dat, code);
 }

@@ -33,7 +33,7 @@ void HRD_statistic::Get_seed() {
                 cout << int(jiang_num) << "-" << int(bing_num) << "-" << int(style_num) << " -> ";
                 case_index.clear();
                 for (i = 0; i < All_Case.size(); i++) { // 在全部布局中找到符合当前要求的布局
-                    if ((*All_Case[i]).jiang_num == jiang_num && (*All_Case[i]).bing_num == bing_num && (*All_Case[i]).style_num == style_num && (*All_Case[i]).group_index == 0) {
+                    if (All_Case[i]->jiang_num == jiang_num && All_Case[i]->bing_num == bing_num && All_Case[i]->style_num == style_num && All_Case[i]->group_index == 0) {
                         case_index.push_back(i);
                     }
                 }
@@ -41,7 +41,7 @@ void HRD_statistic::Get_seed() {
                 if (case_index.size() == 0) {continue;}
                 for (i = 0; i < case_index.size() - 1; i++) {
                     for (j = 0; j < case_index.size() - i - 1; j++) {
-                        if ((*All_Case[case_index[j]]).group_num > (*All_Case[case_index[j + 1]]).group_num) {
+                        if (All_Case[case_index[j]]->group_num > All_Case[case_index[j + 1]]->group_num) {
                             swap(case_index[j], case_index[j + 1]);
                         }
                     }
@@ -49,7 +49,7 @@ void HRD_statistic::Get_seed() {
                 File_name = to_string(jiang_num) + "-" + to_string(bing_num) + "-" + to_string(style_num) + ".txt";
                 output_seed.open(File_name);
                 for (i = 0; i < case_index.size(); i++) { // 录入找到布局的编码
-                    output_seed << cal.Change_str((*All_Case[case_index[i]]).code);
+                    output_seed << cal.Change_str(All_Case[case_index[i]]->code);
                     if (i != case_index.size() - 1) { // 如果不是最后一组就输出回车
                         output_seed << endl;
                     }
@@ -65,7 +65,8 @@ void HRD_statistic::Sort_All_Case() { // 整理所有布局
     unsigned int i, num;
     unsigned char jiang_num, bing_num, style_num;
     for (i = 0; i < All_Case.size(); i++) { // 遍历全部布局
-        analy.Parse_Code((*All_Case[i]).code); // 解析布局
+        All_Case[i]->is_mirror = analy.Is_Mirror(All_Case[i]->code);
+        analy.Parse_Code(All_Case[i]->code); // 解析布局
         jiang_num = bing_num = style_num = 0;
         for (num = 1; num < 15; num++) { // 遍历所有棋子
             switch (analy.Parse_dat.type[num]) {
@@ -83,9 +84,9 @@ void HRD_statistic::Sort_All_Case() { // 整理所有布局
                     continue;
             }
         }
-        (*All_Case[i]).jiang_num = jiang_num;
-        (*All_Case[i]).bing_num = bing_num;
-        (*All_Case[i]).style_num = style_num;
+        All_Case[i]->jiang_num = jiang_num;
+        All_Case[i]->bing_num = bing_num;
+        All_Case[i]->style_num = style_num;
         if (i % 1000000 == 0) { // 显示计算进度
             cout << i << "/" << All_Case.size() << endl;
         }
@@ -100,18 +101,18 @@ void HRD_statistic::Sort_All_Case() { // 整理所有布局
                 case_index.clear();
                 case_code.clear();
                 for (i = 0; i < All_Case.size(); i++) { // 在全部布局中找到符合当前要求的布局
-                    if ((*All_Case[i]).jiang_num == jiang_num && (*All_Case[i]).bing_num == bing_num && (*All_Case[i]).style_num == style_num) {
+                    if (All_Case[i]->jiang_num == jiang_num && All_Case[i]->bing_num == bing_num && All_Case[i]->style_num == style_num) {
                         case_index.push_back(i); // 记录找到布局的索引
                     }
                 }
                 for (i = 0; i < case_index.size(); i++) { // 录入找到布局的编码
-                    case_code.push_back((*All_Case[case_index[i]]).code);
+                    case_code.push_back(All_Case[case_index[i]]->code);
                 }
                 cout << " (" << case_code.size() << ") ...";
                 case_res = Split_Group(case_code); // 进行群组分割
                 for (i = 0; i < case_res.size(); i++) { // 遍历分割结果
-                    (*All_Case[case_index[i]]).group_num = (*case_res[i]).group_num; // 记录群组分类结果
-                    (*All_Case[case_index[i]]).group_index = (*case_res[i]).group_index;
+                    All_Case[case_index[i]]->group_num = case_res[i]->group_num; // 记录群组分类结果
+                    All_Case[case_index[i]]->group_index = case_res[i]->group_index;
                     delete case_res[i]; // 释放内存
                 }
                 cout << "OK" << endl;
@@ -130,18 +131,18 @@ vector <HRD_statistic::Case_group *> HRD_statistic::Split_Group(vector <unsigned
     vector < vector <Case_group *> > groups; // 记录群组数组
     for (i = 0; i < input_dat.size(); i++) { // 记录输入的编码
         Case_group *temp = new Case_group;
-        (*temp).id = i;
-        (*temp).code = input_dat[i];
+        temp->id = i;
+        temp->code = input_dat[i];
         case_list.push_back(temp);
     }
     while (case_list.size() != 0) { // 循环分割群组
         it = case_list.begin(); // 定位当前序列起始点
-        dat = cal.Calculate_All((*(*it)).code); // 计算起始点编码所在的整个群
+        dat = cal.Calculate_All((*it)->code); // 计算起始点编码所在的整个群
         sort(dat.begin(), dat.end()); // 整理顺序
         groups.resize(groups.size() + 1); // groups增加一组
         for (i = 0; i < dat.size(); i++) { // 遍历搜索到的整个群
             while (it != case_list.end()) { // 直到序列的结尾
-                if (dat[i] == (*(*it)).code) { // 在序列中找到
+                if (dat[i] == (*it)->code) { // 在序列中找到
                     groups[groups.size() - 1].push_back(*it); // 记录找到的编码
                     case_list.erase(it++); // 删除序列中当前的编码 并指向序列中下一个编码
                     break; // 退出循环
@@ -161,9 +162,9 @@ vector <HRD_statistic::Case_group *> HRD_statistic::Split_Group(vector <unsigned
     output_dat.resize(input_dat.size()); // 声明返回数组的长度
     for (i = 0; i < groups.size(); i++) { // 遍历所有群
         for (j = 0; j < groups[i].size(); j++) { // 遍历群中的所有元素
-            (*groups[i][j]).group_num = i;
-            (*groups[i][j]).group_index = j;
-            output_dat[(*groups[i][j]).id] = groups[i][j]; // 记录元素到返回数组
+            groups[i][j]->group_num = i;
+            groups[i][j]->group_index = j;
+            output_dat[groups[i][j]->id] = groups[i][j]; // 记录元素到返回数组
         }
     }
     return output_dat;
@@ -175,7 +176,7 @@ void HRD_statistic::Output_All_Case(string File_name) { // 输出全部编码
     ofstream output;
     output.open(File_name);
     for (i = 0; i < All_Case.size(); i++) { // 遍历全部布局
-        output << cal.Change_str((*All_Case[i]).code);
+        output << cal.Change_str(All_Case[i]->code);
         if (i != All_Case.size() - 1) { // 如果不是最后一组就输出回车
             output << endl;
         }
@@ -192,13 +193,18 @@ void HRD_statistic::Output_main_table(string File_name) { // 输出全部编码�
     ofstream output;
     output.open(File_name);
     for (i = 0; i < All_Case.size(); i++) { // 遍历全部布局
-        output << (*All_Case[i]).id << ",";
-        output << cal.Change_str((*All_Case[i]).code) << ",";
-        output << int((*All_Case[i]).jiang_num) << ",";
-        output << int((*All_Case[i]).bing_num) << ",";
-        output << int((*All_Case[i]).style_num) << ",";
-        output << (*All_Case[i]).group_num << ",";
-        output << (*All_Case[i]).group_index;
+        output << All_Case[i]->id << ",";
+        output << cal.Change_str(All_Case[i]->code) << ",";
+        if (All_Case[i]->is_mirror) {
+            output << "Y,";
+        } else {
+            output << "N,";
+        }
+        output << int(All_Case[i]->jiang_num) << ",";
+        output << int(All_Case[i]->bing_num) << ",";
+        output << int(All_Case[i]->style_num) << ",";
+        output << All_Case[i]->group_num << ",";
+        output << All_Case[i]->group_index;
         if (i != All_Case.size() - 1) { // 如果不是最后一组就输出回车
             output << endl;
         }
@@ -219,8 +225,8 @@ void HRD_statistic::Find_All_Case() { // 找到所有编码
             Code = (n << 32) | i; // 生成Code
             if (cal.Check_Code(Code)) { // 检查编码是否正确
                 Case *temp = new Case;
-                (*temp).code = Code;
-                (*temp).id = num;
+                temp->code = Code;
+                temp->id = num;
                 All_Case.push_back(temp); // 记录搜到的编码
                 num++;
             }

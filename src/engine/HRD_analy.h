@@ -7,7 +7,6 @@ using namespace std;
 
 class HRD_analy {
     public:
-        struct Case_near;
         struct Case_cal {
             bool freeze[4][5]; // true -> no move ; false -> can move
             unsigned char status[4][5]; // 0xFF -> undefined ; 0xFE -> space
@@ -15,11 +14,8 @@ class HRD_analy {
             unsigned long long code;
             unsigned int layer_num;
             unsigned int layer_index;
-            Case_near *adjacent;
-        };
-        struct Case_near {
-            vector <Case_cal *> source_case;
-            vector <Case_cal *> next_case;
+            vector <Case_cal *> *source_case;
+            vector <Case_cal *> *next_case;
         };
         vector <vector <Case_cal *> > Layer; // 储存全部层数据的节点
         Case_cal Parse_dat;
@@ -39,6 +35,7 @@ class HRD_analy {
         string Change_str(unsigned long long dat);
         bool Check_Code(unsigned long long code);
         bool Parse_Code(unsigned long long Code);
+        bool Is_Mirror(unsigned long long code);
         void Analyse_Case(unsigned long long code);
         void Output_Detail(string File_name);
         void Free_Data();

@@ -13,7 +13,7 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
     }
     cal(Code); // 进行广搜
     for (i = 0; i < List.size(); i++) {
-        data.push_back((*List[i]).code); // 储存计算结果
+        data.push_back(List[i]->code); // 储存计算结果
     }
     init_data(); // 防止内存泄漏
     return data;
@@ -63,12 +63,12 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻
 vector <unsigned long long> HRD_cal::Get_Path(unsigned int result_num) { // 找到开始到目标的最短路径
     vector <unsigned long long> Path;
     Path.clear();
-    Path.push_back((*List[result_num]).code); // 加入目标布局
+    Path.push_back(List[result_num]->code); // 加入目标布局
     while (List_source[result_num] != 0) { // 找到路径主体
         result_num = List_source[result_num];
-        Path.push_back((*List[result_num]).code); // 加入记录
+        Path.push_back(List[result_num]->code); // 加入记录
     }
-    Path.push_back((*List[0]).code); // 加入开始布局
+    Path.push_back(List[0]->code); // 加入开始布局
     reverse(Path.begin(), Path.end()); // 路径倒置
     init_data();
     return Path;
@@ -102,7 +102,7 @@ void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标
     }
     List.push_back(start); // 加入根节点
     List_source.push_back(0);
-    List_hash[0xffff & ((*start).code >> 16)].push_back(start);
+    List_hash[0xffff & (start->code >> 16)].push_back(start);
     while (now_move != List.size()) { // 找到所有元素后退出
         Find_Next_Case(*List[now_move]);
         if (flag) {break;} // 若找到则退出
@@ -112,14 +112,14 @@ void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标
 
 void HRD_cal::Add_Case(Case_cal *dat) { // 将找到的布局加入队列中
     unsigned int i, x, y;
-    int hash_index = 0xffff & ((*dat).code >> 16); // 取得哈希索引
+    int hash_index = 0xffff & (dat->code >> 16); // 取得哈希索引
     for (i = 0; i < List_hash[hash_index].size(); i++) { // 遍历索引内容
-        if ((*List_hash[hash_index][i]).code == (*dat).code) { // 发现重复
+        if (List_hash[hash_index][i]->code == dat->code) { // 发现重复
             // 通过freeze表合并来屏蔽不必要的移动
             for (x = 0; x < 4; x++) { // 遍历freeze表
                 for (y = 0; y < 5; y++) {
-                    if ((*dat).freeze[x][y]) { // 将输入表合并到原先的表上
-                        (*List_hash[hash_index][i]).freeze[x][y] = true;
+                    if (dat->freeze[x][y]) { // 将输入表合并到原先的表上
+                        List_hash[hash_index][i]->freeze[x][y] = true;
                     }
                 }
             }
@@ -131,12 +131,12 @@ void HRD_cal::Add_Case(Case_cal *dat) { // 将找到的布局加入队列中
     List_source.push_back(now_move); // 记录溯源信息
     List_hash[hash_index].push_back(dat); // 加入哈希索引
     if (mode == 1) { // 寻解模式
-        if ((0xF & ((*dat).code >> 32)) == 0xD) { // 2 * 2块在出口位置
+        if ((0xF & (dat->code >> 32)) == 0xD) { // 2 * 2块在出口位置
             flag = true; // 标志已找到目标
             result = List.size() - 1; // 记录找到的目标位置
         }
     } else if (mode == 2) { // 查找目标模式
-        if ((*dat).code == target_code) { // 搜索到目标
+        if (dat->code == target_code) { // 搜索到目标
             flag = true; // 标志已找到目标
             result = List.size() - 1; // 记录找到的目标位置
         }
@@ -306,17 +306,17 @@ void HRD_cal::Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5])
     *dat_mod = dat;
     switch ((*dat_mod).type[num]) { // 注入移动后的信息
         case 0: // 2 * 2
-            (*dat_mod).status[x][y] = (*dat_mod).status[x][y + 1]
-                = (*dat_mod).status[x + 1][y] = (*dat_mod).status[x + 1][y + 1] = num;
+            dat_mod->status[x][y] = dat_mod->status[x][y + 1]
+                = dat_mod->status[x + 1][y] = dat_mod->status[x + 1][y + 1] = num;
             break;
         case 1: // 2 * 1
-            (*dat_mod).status[x][y] = (*dat_mod).status[x + 1][y] = num;
+            dat_mod->status[x][y] = dat_mod->status[x + 1][y] = num;
             break;
         case 2: // 1 * 2
-            (*dat_mod).status[x][y] = (*dat_mod).status[x][y + 1] = num;
+            dat_mod->status[x][y] = dat_mod->status[x][y + 1] = num;
             break;
         case 3: // 1 * 1
-            (*dat_mod).status[x][y] = num;
+            dat_mod->status[x][y] = num;
             break;
     }
     Get_Code(*dat_mod); // 更新移动后的编码

@@ -13,6 +13,7 @@ class HRD_statistic {
     private:
         struct Case {
             unsigned int id;
+            bool is_mirror;
             unsigned long long code;
             unsigned char jiang_num;
             unsigned char bing_num;
