@@ -1,3 +1,7 @@
+## jiang_num-bing_num-style_num分类的元素数量(203种)
+
+(不存在*jiang_num-bing_num-style_num = 7-0-0*)
+
 | jiang_num | bing_num | style_num | COUNT |
 | :-: | :-: | :-: | :-: |
 |         0 |        0 |         0 |       12 |

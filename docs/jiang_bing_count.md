@@ -1,3 +1,5 @@
+## jiang_num-bing_num分类的元素数量(64种)
+
 | jiang_num | bing_num | COUNT |
 | :-: | :-: | :-: |
 | 0 |  0 |      12 |

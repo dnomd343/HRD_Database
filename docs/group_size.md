@@ -1,3 +1,5 @@
+## 群包含的元素数量统计
+
 | jiang_num | bing_num | style_num | group_num | group_size |
 | :-: | :-: | :-: | :-: | :-: |
 |	0	|	0	|	0	|	0	|	12	|
