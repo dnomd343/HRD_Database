@@ -14,6 +14,7 @@ unsigned long long checked_code;
 
 bool code_check(string str) {
     HRD_cal cal;
+    bool flag;
     char code_str[10];
     if (str.length() > 9) { // 超过九位 错误
         return false;
@@ -21,6 +22,15 @@ bool code_check(string str) {
         str.resize(9, '0'); // 剩余的补0
     }
     for (unsigned int i = 0; i < str.length(); i++) {
+    	flag = false;
+    	if (str[i] >= 48 && str[i] <= 57) { // 0 ~ 9
+            flag = true;
+        } else if (str[i] >= 65 && str[i] <= 70) { // A ~ F
+            flag = true;
+        } else if (str[i] >= 97 && str[i] <= 102) { // a ~ f
+            flag = true;
+        }
+        if (!flag) {return false;} // 存在非法字符 错误
         code_str[i] = str[i];
     }
     code_str[9] = '\0';
@@ -40,7 +50,7 @@ void show_case(string str) {
     char output_char[3] = "&%";
     cout << endl;
     cout << "Code: " << analy.Change_str(code) << endl;
-    analy.Output_Graph(code, 3, 1, output_char);
+    analy.Output_Graph(code, 4, 1, output_char);
     cout << endl;
 }
 
@@ -327,7 +337,7 @@ void show_help() {
     cout << "  --show <code> [square_width]" << endl;
     cout << "    Purpose: Visualize the <code>" << endl;
     cout << "    eg: ./engine --show 1A9BF0C00" << endl;
-    cout << "        ./engine --show 1A9BF0C00 4" << endl;
+    cout << "        ./engine --show 1A9BF0C00 5" << endl;
     cout << endl;
     cout << "  --cal <code> [file_name]" << endl;
     cout << "    Purpose: Find the minimum step solution of <code>" << endl;
