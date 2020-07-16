@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form Form_main 
    AutoRedraw      =   -1  'True
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "HRD Visual v1.0 by Dnomd343"
+   Caption         =   "HRD Visual v1.1 by Dnomd343"
    ClientHeight    =   6495
    ClientLeft      =   45
    ClientTop       =   390
@@ -13,11 +13,17 @@ Begin VB.Form Form_main
    ScaleHeight     =   6495
    ScaleWidth      =   4815
    StartUpPosition =   2  '屏幕中心
-   Begin VB.Timer Timer 
+   Begin VB.Timer Timer_Tip 
+      Enabled         =   0   'False
+      Interval        =   1200
+      Left            =   0
+      Top             =   0
+   End
+   Begin VB.Timer Timer_KeyPress 
       Enabled         =   0   'False
       Interval        =   10
-      Left            =   4305
-      Top             =   5040
+      Left            =   0
+      Top             =   0
    End
    Begin VB.CommandButton Command_OK 
       Caption         =   "OK"
@@ -61,6 +67,28 @@ Begin VB.Form Form_main
       Top             =   5900
       Width           =   2040
    End
+   Begin VB.Label Label_Tip 
+      Alignment       =   2  'Center
+      Appearance      =   0  'Flat
+      AutoSize        =   -1  'True
+      BackColor       =   &H80000005&
+      BeginProperty Font 
+         Name            =   "微软雅黑"
+         Size            =   12
+         Charset         =   134
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H80000008&
+      Height          =   15
+      Left            =   15
+      TabIndex        =   4
+      Top             =   0
+      Visible         =   0   'False
+      Width           =   15
+   End
 End
 Attribute VB_Name = "Form_main"
 Attribute VB_GlobalNameSpace = False
@@ -74,7 +102,6 @@ Dim click_x_ As Integer, click_y_ As Integer ' 记录按下位置的窗体坐标
 Dim mouse_x As Integer, mouse_y As Integer ' 记录当前鼠标位置合法对应的棋盘编号
 Dim output As Case_size ' 输出大小
 Dim case_main As Case_detail ' 布局信息
-Dim timer_ctl As Integer
 Dim exclude(-1 To 1, -1 To 1) As Boolean ' 记录按下位置周围是否能放置棋子 true -> 不难 / false -> 能
 Private Sub Form_Load() ' 窗体初始化
   Call Init_case
@@ -123,8 +150,7 @@ Private Sub Text_Code_KeyPress(KeyAscii As Integer) ' 文本框输入内容
   If KeyAscii = 13 Then ' 回车键
     Call Command_OK_Click ' 模拟点击OK按钮
   Else
-    timer_ctl = 200 ' 发送至timer显示
-    Timer.Enabled = True
+    Timer_KeyPress.Enabled = True
   End If
 End Sub
 Private Function Try_parse_code(code As String) As Boolean ' 尝试解码
@@ -139,13 +165,11 @@ Private Function Try_parse_code(code As String) As Boolean ' 尝试解码
     If flag = False Then Try_parse_code = False: Exit Function ' 如果存在不合法字符 退出
   Next i
   If Len(code) < 9 Then code = code & String(9 - Len(code), "0") ' 补0到9位
+  Try_parse_code = False
   If Parse_Code(code) = True Then ' 解码正确
     case_main = Parse_data
     Call Output_case(Form_main, case_main, output) ' 刷新显示界面
     Try_parse_code = True
-  Else
-    Try_parse_code = False
-    Exit Function
   End If
 End Function
 Private Sub Try_get_code() ' 尝试获取编码
@@ -158,19 +182,32 @@ Private Sub Try_get_code() ' 尝试获取编码
   Wend
   Text_Code = code
 End Sub
-Private Sub Timer_Timer()
-  timer_ctl = timer_ctl - 1
-  If timer_ctl = -1 Then Timer.Enabled = False ' 运行次数限制
+Private Sub Timer_KeyPress_Timer()
   If Text_Code = "" Then ' 已经被删空
     Call Init_case
     Call Output_case(Form_main, case_main, output)
-    Exit Sub
-  End If
-  If Try_parse_code(Text_Code) = False Then ' 根据输入正确性显示不同颜色
-    Text_Code.ForeColor = vbRed
   Else
-    Text_Code.ForeColor = vbBlack
+    If Try_parse_code(Text_Code) = False Then ' 根据输入正确性显示不同颜色
+      Text_Code.ForeColor = vbRed
+    Else
+      Text_Code.ForeColor = vbBlack
+    End If
   End If
+  Timer_KeyPress.Enabled = False
+End Sub
+Private Sub Show_tip(tip_data As String) ' 显示提示 1.2s后消失
+  Timer_Tip.Enabled = False ' 防止闪烁
+  Label_Tip = tip_data
+  Label_Tip.ForeColor = style.block_line_color
+  Label_Tip.BackColor = style.block_color
+  Label_Tip.Top = (Form_main.Height - Label_Tip.Height) / 2 - 480
+  Label_Tip.Left = (Form_main.Width - Label_Tip.Width) / 2 - 60
+  Label_Tip.Visible = True
+  Timer_Tip = True ' 定时关闭
+End Sub
+Private Sub Timer_Tip_Timer()
+  Label_Tip.Visible = False
+  Timer_Tip.Enabled = False ' 开启后停止运转
 End Sub
 Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single) ' 按下鼠标按键
   Text_Focus.SetFocus
@@ -277,39 +314,49 @@ Private Sub Form_MouseUp(Button As Integer, Shift As Integer, x As Single, y As 
   block_y = min(click_y, mouse_y) - 1
   block_width = Abs(click_x - mouse_x) + 1 ' 计算绘制棋子的宽和高
   block_height = Abs(click_y - mouse_y) + 1
-    If block_width = 2 And block_height = 2 Then ' 绘制的棋子是2 * 2
-    If Get_empty_num >= 6 Then ' 当前至少有6个空位
-      case_main.kind(0) = 0
-      case_main.status(block_x, block_y) = 0
-      case_main.status(block_x, block_y + 1) = 0
-      case_main.status(block_x + 1, block_y) = 0
-      case_main.status(block_x + 1, block_y + 1) = 0
-    End If
+  num = Get_empty_seat ' 取得下一个未使用的棋子编号
+  If block_width = 2 And block_height = 2 Then ' 绘制的棋子是2 * 2
+    If Get_empty_num < 6 Then Call Show_tip("至少要留两个空格噢"): GoTo out
+    case_main.kind(0) = 0
+    case_main.status(block_x, block_y) = 0
+    case_main.status(block_x, block_y + 1) = 0
+    case_main.status(block_x + 1, block_y) = 0
+    case_main.status(block_x + 1, block_y + 1) = 0
   ElseIf block_width = 2 And block_height = 1 Then ' 绘制的棋子是2 * 1
-    num = Get_empty_seat
-    If num <> 0 And Get_empty_num >= 4 Then ' 当前棋子数未到上限且至少存在4个空位
-      case_main.kind(num) = 1
-      case_main.status(block_x, block_y) = num
-      case_main.status(block_x + 1, block_y) = num
-      If case_main.kind(0) <> 0 And Check_2x2_seat = False Then Call Clear_block(num)
+    If num = 0 Then Call Show_tip("棋子数量超过限制啦"): GoTo out
+    If Get_empty_num < 4 Then Call Show_tip("至少要留两个空格噢"): GoTo out
+    case_main.kind(num) = 1
+    case_main.status(block_x, block_y) = num
+    case_main.status(block_x + 1, block_y) = num
+    If case_main.kind(0) <> 0 And Check_2x2_seat = False Then
+      Call Clear_block(num)
+      Call Show_tip("要留位置给曹操哦")
+      GoTo out
     End If
   ElseIf block_width = 1 And block_height = 2 Then ' 绘制的棋子是1 * 2
-    num = Get_empty_seat
-    If num <> 0 And Get_empty_num >= 4 Then ' 当前棋子数未到上限且至少存在4个空位
-      case_main.kind(num) = 2
-      case_main.status(block_x, block_y) = num
-      case_main.status(block_x, block_y + 1) = num
-      If case_main.kind(0) <> 0 And Check_2x2_seat = False Then Call Clear_block(num)
+    If num = 0 Then Call Show_tip("棋子数量超过限制啦"): GoTo out
+    If Get_empty_num < 4 Then Call Show_tip("至少要留两个空格噢"): GoTo out
+    case_main.kind(num) = 2
+    case_main.status(block_x, block_y) = num
+    case_main.status(block_x, block_y + 1) = num
+    If case_main.kind(0) <> 0 And Check_2x2_seat = False Then
+      Call Clear_block(num)
+      Call Show_tip("要留位置给曹操哦")
+      GoTo out
     End If
   ElseIf block_width = 1 And block_height = 1 Then ' 绘制的棋子是1 * 1
-    num = Get_empty_seat
-    If num <> 0 And Get_empty_num >= 3 Then ' 当前棋子数未到上限且至少存在3个空位
-      case_main.kind(num) = 3
-      case_main.status(block_x, block_y) = num
-      If case_main.kind(0) <> 0 And Check_2x2_seat = False Then Call Clear_block(num)
+    If num = 0 Then Call Show_tip("棋子数量超过限制啦"): GoTo out
+    If Get_empty_num < 3 Then Call Show_tip("至少要留两个空格噢"): GoTo out
+    case_main.kind(num) = 3
+    case_main.status(block_x, block_y) = num
+    If case_main.kind(0) <> 0 And Check_2x2_seat = False Then
+      Call Clear_block(num)
+      Call Show_tip("要留位置给曹操哦")
+      GoTo out
     End If
   End If
   Call Try_get_code
+out:
   Call Output_case(Form_main, case_main, output) ' 刷新显示界面
 End Sub
 Private Sub Clear_block(num As Integer) ' 根据编号清空棋子信息
@@ -335,10 +382,9 @@ Private Sub Clear_block(num As Integer) ' 根据编号清空棋子信息
     case_main.status(addr_x, addr_y) = 254
   End If
 End Sub
-Private Function Check_2x2_seat() As Boolean
+Private Function Check_2x2_seat() As Boolean ' 查询是否还有空位放置2 x 2棋子
   Dim i As Integer, j As Integer
   Check_2x2_seat = False
-  'If case_main.kind(0) = 0 Then Exit Function
   For j = 0 To 3
     For i = 0 To 2
       If case_main.status(i, j) = 254 And case_main.status(i, j + 1) = 254 And case_main.status(i + 1, j) = 254 And case_main.status(i + 1, j + 1) = 254 Then Check_2x2_seat = True
