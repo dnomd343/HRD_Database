@@ -22,8 +22,8 @@ bool code_check(string str) {
         str.resize(9, '0'); // 剩余的补0
     }
     for (unsigned int i = 0; i < str.length(); i++) {
-    	flag = false;
-    	if (str[i] >= 48 && str[i] <= 57) { // 0 ~ 9
+        flag = false;
+        if (str[i] >= 48 && str[i] <= 57) { // 0 ~ 9
             flag = true;
         } else if (str[i] >= 65 && str[i] <= 70) { // A ~ F
             flag = true;
