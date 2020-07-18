@@ -455,7 +455,7 @@ string HRD_cal::Change_str(unsigned long long dat) { // 将数字转化为文本
     return str;
 }
 
-unsigned long long HRD_cal::Change_int (char *str) { // 将文本编码转化为数字(传入9位字符串)
+unsigned long long HRD_cal::Change_int(char *str) { // 将文本编码转化为数字(传入9位字符串)
     unsigned long long dat = 0;
     for (int i = 0; i < 9; i++) { // 将每一位从ASCII码转为数值
         dat <<= 4;

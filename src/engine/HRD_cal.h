@@ -7,7 +7,7 @@ using namespace std;
 
 class HRD_cal {
     public:
-        unsigned long long Change_int (char str[10]);
+        unsigned long long Change_int(char str[10]);
         string Change_str(unsigned long long dat);
         bool Check_Code(unsigned long long Code);
         vector <unsigned long long> Calculate(unsigned long long Code);

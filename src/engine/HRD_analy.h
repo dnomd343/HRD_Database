@@ -31,7 +31,7 @@ class HRD_analy {
         int farthest_num; // 最远布局的个数
         vector <unsigned long long> farthest_case; // 所有最远的布局
 
-        unsigned long long Change_int (char str[10]);
+        unsigned long long Change_int(char str[10]);
         string Change_str(unsigned long long dat);
         bool Check_Code(unsigned long long code);
         bool Parse_Code(unsigned long long Code);
