@@ -1,6 +1,6 @@
 ## 群的数量统计
 
-| jiang_num | bing_num | style_num | 群的数量 |
+| jiang_num | bing_num | style_num | COUNT |
 | :-: | :-: | :-: | :-: |
 | 0 | 0 | 0 | 1 |
 | 0 | 1 | 0 | 1 |

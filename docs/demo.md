@@ -1,6 +1,6 @@
 ## 库的调用
 
-代码已封装为四个类
+代码已封装为四个类，介绍如下
 
 + HRD_cal: 华容道快速计算器
 
@@ -37,9 +37,10 @@ using namespace std;
 
 int main() {
     cout << "Klotski fast calculator by Dnomd343" << endl;
+    cout << "----------------" << endl;
     vector <unsigned long long> dat;
     HRD_cal demo;
-    
+
     // 将编码转为文本(参数为unsigned long long 返回string类)
     cout << "4FEA13400 is " << demo.Change_str(0x4FEA13400) << endl;
     cout << "----------------" << endl;
@@ -49,10 +50,14 @@ int main() {
     cout << "----------------" << endl;
 
     // 检测编码的正确性
+    cout << "Check the code: 123456789 -> ";
     if (demo.Check_Code(0x123456789) == false) {
         cout << "Code error!" << endl;
+    } else {
+        cout << "No problem" << endl;
     }
-    
+    cout << "----------------" << endl;
+
     // 计算最少步数(参数为unsigned long long 返回vector类)
     dat = demo.Calculate(0x1A9BF0C00);
     cout << demo.Change_str(0x1A9BF0C00) << "'s solution";
@@ -88,6 +93,8 @@ int main() {
 
 + 检查编码是否合法
 
++ 检测编码是否左右对称
+
 + 根据起始布局分析出层级结构，包括各层间的链接关系
 
 + 得到布局的具体参数，包括全部最远布局、全部最少步解、全部合法解及其步数
@@ -105,10 +112,28 @@ using namespace std;
 
 int main() {
     cout << "Klotski Analyser by Dnomd343" << endl;
+    cout << "---------------------------" << endl;
     HRD_analy demo;
 
+    // 判断编码是否左右对称
+    cout << "Check Mirror(code: 1A9BF0C00) -> ";
+    if (demo.Is_Mirror(0x1A9BF0C00)) {
+        cout << "yes" << endl;
+    } else {
+        cout << "no" << endl;
+    }
+    cout << "Check Mirror(code: 4FEA13400) -> ";
+    if (demo.Is_Mirror(0x4FEA13400)) {
+        cout << "yes" << endl;
+    } else {
+        cout << "no" << endl;
+    }
+    cout << "---------------------------" << endl;
+
     // 显示编码的实际布局样式
+    cout << "Show 1A9BF0C00: " << endl;
     demo.Output_Graph(0x1A9BF0C00, 4, 1, "&%");
+    cout << "---------------------------" << endl;
 
     // 解译编码
     demo.Parse_Code(0x1A9BF0C00);
@@ -165,25 +190,36 @@ int main() {
     cout << "---------------------------" << endl;
 
     // 查看某布局的前后情况
-    int layer_num = 29, layer_index = 190;
-    // 得到全部父节点
-    for (int k = 0; k < (*(*demo.Layer[layer_num][layer_index]).adjacent).source_case.size(); k++) {
-        cout << " (" << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).source_case[k]).layer_num;
-        cout << "," << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).source_case[k]).layer_index << "):";
-        cout << demo.Change_str((*(*(*demo.Layer[layer_num][layer_index]).adjacent).source_case[k]).code);
+    int num = 29, index = 190;
+    cout << "Case near (num = " << num << ", index = " << index << ")" << endl;
+
+    // 得到全部父节点数据
+    for (int k = 0; k < demo.Layer[num][index]->source_case->size(); k++) {
+        cout << "(" << demo.Layer[num][index]->source_case->at(k)->layer_num;
+        cout << "," << demo.Layer[num][index]->source_case->at(k)->layer_index << ") = ";
+        cout << demo.Change_str(demo.Layer[num][index]->source_case->at(k)->code);
+        if (k + 1 != demo.Layer[num][index]->source_case->size()) {
+            cout << " / ";
+        }
     }
-    cout << " ->";
-    cout << " (" << layer_num << "," << layer_index << "):" << demo.Change_str((*demo.Layer[layer_num][layer_index]).code);
-    cout << " ->";
-    // 得到全部子节点
-    for (int k = 0; k < (*(*demo.Layer[layer_num][layer_index]).adjacent).next_case.size(); k++) {
-        cout << " (" << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).next_case[k]).layer_num;
-        cout << "," << (*(*(*demo.Layer[layer_num][layer_index]).adjacent).next_case[k]).layer_index << "):";
-        cout << demo.Change_str((*(*(*demo.Layer[layer_num][layer_index]).adjacent).next_case[k]).code);
+
+    // 得到本节点数据
+    cout << " -> ";
+    cout << "(" << num << "," << index << ") = " << demo.Change_str(demo.Layer[num][index]->code);
+    cout << " -> ";
+    
+    // 得到全部子节点数据
+    for (int k = 0; k < demo.Layer[num][index]->next_case->size(); k++) {
+        cout << "(" << demo.Layer[num][index]->next_case->at(k)->layer_num;
+        cout << "," << demo.Layer[num][index]->next_case->at(k)->layer_index << ") = ";
+        cout << demo.Change_str(demo.Layer[num][index]->next_case->at(k)->code);
+        if (k + 1 != demo.Layer[num][index]->next_case->size()) {
+            cout << " / ";
+        }
     }
     cout << endl;
     cout << "---------------------------" << endl;
-    
+
     return 0;
 }
 ```
@@ -207,13 +243,16 @@ using namespace std;
 
 int main() {
     cout << "Klotski batch analyser by Dnomd343" << endl;
+    cout << "---------------------------" << endl;
     HRD_group demo;
     
     // 计算群组中所有元素的具体参数并输出到文件（此处即计算1A9BF0C00所在群的数据）
     demo.Batch_Analyse(0x1A9BF0C00, "farthest.csv", "solution.csv", true);
-    
+    cout << "---------------------------" << endl;
+
     // 计算多个群组的分析信息，同时合并输出到文件（编码储存于5-4-0.txt中，最后一行切不可为空）
     demo.Multi_Analyse("5-4-0.txt", "farthest_5-4-0.csv", "solution_5-4-0.csv", true);
+    cout << "---------------------------" << endl;
 
     return 0;
 }
@@ -240,14 +279,17 @@ using namespace std;
 
 int main() {
     cout << "Klotski statistician by Dnomd343" << endl;
+    cout << "---------------------------" << endl;
     HRD_statistic demo;
     
     // 找到全部合法的编码
     demo.Find_All_Case("Output-All_Case.txt");
-    
+    cout << "---------------------------" << endl;
+
     // 找到全部合法的编码并进行分类输出
     demo.All_Statistic();
-    
+    cout << "---------------------------" << endl;
+
     return 0;
 }
 ```
