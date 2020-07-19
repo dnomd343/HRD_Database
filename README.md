@@ -95,9 +95,9 @@
 
 下载
 
-[Github仓库](./res/HRD_Virual.exe)
+[Git仓库](./tools/HRD_Visual.exe)
 
-[备用链接](https://hrd.dnomd343.top/download/HRD_Virual.exe)
+[备用链接](https://hrd.dnomd343.top/download/HRD_Visual.exe)
 
 
 ### 计算引擎
