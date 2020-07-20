@@ -30,7 +30,7 @@ CREATE TABLE farthest_temp (
 	code CHAR(9) NOT NULL,
 	farthest_step SMALLINT unsigned NOT NULL,
 	farthest_num SMALLINT unsigned NOT NULL,
-	farthest_case TEXT,
+	farthest_case MEDIUMTEXT,
 	PRIMARY KEY (code)
 ) DEFAULT CHARSET = utf8;
 
@@ -39,7 +39,7 @@ CREATE TABLE solution_temp (
 	code CHAR(9) NOT NULL,
 	min_solution_step SMALLINT NOT NULL,
 	min_solution_num SMALLINT unsigned NOT NULL,
-	min_solution_case TEXT,
+	min_solution_case MEDIUMTEXT,
 	solution_num SMALLINT unsigned NOT NULL,
 	PRIMARY KEY (code)
 ) DEFAULT CHARSET = utf8;
