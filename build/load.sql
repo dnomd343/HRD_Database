@@ -1,8 +1,8 @@
 -- 新建并切换到hrd数据库
 SELECT 'Initializing...' AS ' ';
-DROP DATABASE IF EXISTS test;
-CREATE DATABASE test;
-USE test;
+DROP DATABASE IF EXISTS hrd;
+CREATE DATABASE hrd;
+USE hrd;
 
 -- 初始化数据库
 DROP TABLE IF EXISTS main;
