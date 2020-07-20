@@ -75,6 +75,13 @@ INTO TABLE farthest_temp
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n';
 
+-- 整理数据到farthest表中
+SELECT 'Collating farthest table...' AS ' ';
+ALTER TABLE farthest_temp DROP COLUMN farthest_case;
+INSERT INTO farthest (farthest_step, farthest_num)
+SELECT farthest_step, farthest_num FROM farthest_temp;
+DROP TABLE farthest_temp;
+
 -- 载入solution.csv的数据
 SELECT 'Loading solution.csv...' AS ' ';
 LOAD DATA INFILE 'D:/HRD_Database/build/release/solution.csv'
@@ -82,24 +89,23 @@ INTO TABLE solution_temp
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n';
 
--- 整理数据到farthest表中
-SELECT 'Collating farthest table...' AS ' ';
-INSERT INTO farthest (farthest_step, farthest_num)
-SELECT farthest_step, farthest_num FROM farthest_temp;
-
 -- 整理数据到solution表中
 SELECT 'Collating solution table...' AS ' ';
+ALTER TABLE solution_temp DROP COLUMN min_solution_case;
 INSERT INTO solution (min_solution_step, min_solution_num, solution_num)
 SELECT min_solution_step, min_solution_num, solution_num FROM solution_temp;
+DROP TABLE solution_temp;
 
 -- 更正id值
 SELECT 'Syncing id...' AS ' ';
 ALTER TABLE farthest CHANGE id id INT unsigned NOT NULL;
 ALTER TABLE solution CHANGE id id INT unsigned NOT NULL;
+ALTER TABLE farthest DROP PRIMARY KEY;
+ALTER TABLE solution DROP PRIMARY KEY;
 UPDATE farthest SET id = id - 1;
 UPDATE solution SET id = id - 1;
+ALTER TABLE farthest ADD PRIMARY KEY (id);
+ALTER TABLE solution ADD PRIMARY KEY (id);
 
 -- 导入完成
-DROP TABLE farthest_temp;
-DROP TABLE solution_temp;
 SELECT 'All Done' AS ' ';
