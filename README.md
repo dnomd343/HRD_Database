@@ -14,14 +14,16 @@
 下载地址：
 
 [奶牛快传](https://c-t.work/s/9049c41d245646)
-[腾讯微云](https://share.weiyun.com/5nj2lci4)
-[百度网盘(提取码9vef)](https://pan.baidu.com/s/13GtkrhbDbgA74X4MsuxYqQ)
 
-> HRD_Database.7z
+[腾讯微云](https://share.weiyun.com/5nj2lci4)
+
+[百度网盘](https://pan.baidu.com/s/13GtkrhbDbgA74X4MsuxYqQ)（提取码：9vef）
+
+> HRD_Database.7z  
 > MD5: EC67E7E5AACD408367A3ECF3C61E7017
 
 解压后请确认文件MD5
-> HRD_Database.sql
+> HRD_Database.sql  
 > MD5: B395E82B5E9E82E572DA8CB7683ECA41
 
 
@@ -29,16 +31,16 @@
 
 如果你的计算机有MySQL环境，请以root身份登录后执行以下命令，资料将会导入到`hrd`数据库中
 
-> DROP DATABASE IF EXISTS hrd;
-> CREATE DATABASE hrd;
-> USE hrd;
+> DROP DATABASE IF EXISTS hrd;  
+> CREATE DATABASE hrd;  
+> USE hrd;  
 > SOURCE \~/HRD_Database.sql;
 
 如果你的计算机不方便安装MySQL服务，你可以选择使用以下信息登录云端数据库
 
-> IP: 47.107.149.138
-> 端口: 34326
-> 用户名: hrd
+> IP: 47.107.149.138  
+> 端口: 34326  
+> 用户名: hrd  
 > 密码: hrd_db
 
 + 若可以接受命令行环境，请安装`mysql-client`，使用以下命令登录
@@ -52,6 +54,26 @@
 
 ## 布署云端数据库
 
+首先在云服务器上导入hrd数据库，然后创建用户供他人使用
+
++ 创建用户
+> create user hrd identified by 'hrd_db';
+
++ 授予select权限
+> grant select on hrd.* to hrd;
+
++ 收回select权限
+> revoke select on hrd.* from hrd;
+
++ 查看用户拥有的权限
+> show grants for hrd;
+
++ 查看用户与对应主机
+> use mysql;
+> select host, user from user;
+
++ 删除用户
+> drop user hrd;
 
 
 ## 如何运行这个项目
@@ -70,10 +92,12 @@ build文件夹是计算并建立数据库的工作目录，里面的脚本均为
 3. 执行release.sh
 它会将farthest和solution文件夹下全部csv文档分别进行合并，得到./release/farthest.csv与./release/solution.csv这两个文件。
 执行下一步之前，请先确认./release/下的文件MD5：
-> All_Case.txt	EEB931800E1B6EB10D46DB4DD6A1561F
-> main.csv		4B99D2AD0B919CDE2D0FDE6F7010E698
-> farthest.csv	ED06FF2FE14E862BCD5F357408959BE8
-> solution.csv	E05A98D2391CCFB058F62BDFEAAB1D09
+| File_name | MD5 |
+| :-: | :-: |
+| All_Case.txt | EEB931800E1B6EB10D46DB4DD6A1561F |
+| main.csv     | 4B99D2AD0B919CDE2D0FDE6F7010E698 |
+| farthest.csv | ED06FF2FE14E862BCD5F357408959BE8 |
+| solution.csv | E05A98D2391CCFB058F62BDFEAAB1D09 |
 
 4. 执行load.sql
 它用于将csv文档导入MySQL数据库，请先确认以下内容：
