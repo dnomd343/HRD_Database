@@ -8,21 +8,40 @@
 
 因此，这个项目将通过穷举的方式来得到全部布局的详细信息并录入数据库进行分类整理，再而进行统计分析。
 
+## 文档目录
+
++ [华容道严格定义](./docs/klotski.md)
+
++ [华容道编码原理](./docs/klotski_code.md)
+
++ [engine的使用](./docs/usage.md)
+
++ [函数库的调用](./docs/demo.md)
+
++ [群的数量统计](./docs/group_num.md)
+
++ [群包含的元素数量统计](./docs/group_size.md)
+
++ [64种分类的元素数量](./docs/jiang_bing_count.md)
+
++ [203种分类的元素数量](./docs/style_count.md)
+
 
 ## 数据库下载
 
-下载地址：
+### 下载地址
 
-[奶牛快传](https://c-t.work/s/9049c41d245646)
++ [腾讯微云](https://share.weiyun.com/5nj2lci4)
 
-[腾讯微云](https://share.weiyun.com/5nj2lci4)
++ [百度网盘](https://pan.baidu.com/s/13GtkrhbDbgA74X4MsuxYqQ)（提取码：9vef）
 
-[百度网盘](https://pan.baidu.com/s/13GtkrhbDbgA74X4MsuxYqQ)（提取码：9vef）
++ [Github Release](https://github.com/dnomd343/HRD_Database/releases/download/v1.1/HRD_Database.7z)
 
 > HRD_Database.7z  
 > MD5: EC67E7E5AACD408367A3ECF3C61E7017
 
-解压后请确认文件MD5
+解压后SQL文件哈希值
+
 > HRD_Database.sql  
 > MD5: B395E82B5E9E82E572DA8CB7683ECA41
 
@@ -92,6 +111,7 @@ build文件夹是计算并建立数据库的工作目录，里面的脚本均为
 3. 执行release.sh
 它会将farthest和solution文件夹下全部csv文档分别进行合并，得到./release/farthest.csv与./release/solution.csv这两个文件。
 执行下一步之前，请先确认./release/下的文件MD5：
+
 | File_name | MD5 |
 | :-: | :-: |
 | All_Case.txt | EEB931800E1B6EB10D46DB4DD6A1561F |
