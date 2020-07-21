@@ -112,12 +112,13 @@ build文件夹是计算并建立数据库的工作目录，里面的脚本均为
 它会将farthest和solution文件夹下全部csv文档分别进行合并，得到./release/farthest.csv与./release/solution.csv这两个文件。
 执行下一步之前，请先确认./release/下的文件MD5：
 
-| File_name | MD5 |
-| :-: | :-: |
-| All_Case.txt | EEB931800E1B6EB10D46DB4DD6A1561F |
-| main.csv     | 4B99D2AD0B919CDE2D0FDE6F7010E698 |
-| farthest.csv | ED06FF2FE14E862BCD5F357408959BE8 |
-| solution.csv | E05A98D2391CCFB058F62BDFEAAB1D09 |
+> All_Case.txt  EEB931800E1B6EB10D46DB4DD6A1561F
+
+> main.csv      4B99D2AD0B919CDE2D0FDE6F7010E698
+
+> farthest.csv  ED06FF2FE14E862BCD5F357408959BE8
+
+> solution.csv  E05A98D2391CCFB058F62BDFEAAB1D09
 
 4. 执行load.sql
 它用于将csv文档导入MySQL数据库，请先确认以下内容：
