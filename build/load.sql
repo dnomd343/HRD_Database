@@ -30,19 +30,17 @@ CREATE TABLE farthest_temp (
 	code CHAR(9) NOT NULL,
 	farthest_step SMALLINT unsigned NOT NULL,
 	farthest_num SMALLINT unsigned NOT NULL,
-	farthest_case MEDIUMTEXT,
 	PRIMARY KEY (code)
-) DEFAULT CHARSET = utf8;
+);
 
 -- 创建solution_temp表：
 CREATE TABLE solution_temp (
 	code CHAR(9) NOT NULL,
 	min_solution_step SMALLINT NOT NULL,
 	min_solution_num SMALLINT unsigned NOT NULL,
-	min_solution_case MEDIUMTEXT,
 	solution_num SMALLINT unsigned NOT NULL,
 	PRIMARY KEY (code)
-) DEFAULT CHARSET = utf8;
+);
 
 -- 创建farthest表：
 CREATE TABLE farthest (
@@ -50,7 +48,7 @@ CREATE TABLE farthest (
 	farthest_step SMALLINT unsigned NOT NULL,
 	farthest_num SMALLINT unsigned NOT NULL,
 	PRIMARY KEY (id)
-) auto_increment = 1 DEFAULT CHARSET = utf8;
+) auto_increment = 1;
 
 -- 创建solution表：
 CREATE TABLE solution (
@@ -59,7 +57,7 @@ CREATE TABLE solution (
 	min_solution_num SMALLINT unsigned NOT NULL,
 	solution_num SMALLINT unsigned NOT NULL,
 	PRIMARY KEY (id)
-) auto_increment = 1 DEFAULT CHARSET = utf8;
+) auto_increment = 1;
 
 -- 载入main.csv的数据
 SELECT 'Loading main.csv...' AS ' ';
@@ -77,7 +75,6 @@ LINES TERMINATED BY '\n';
 
 -- 整理数据到farthest表中
 SELECT 'Collating farthest table...' AS ' ';
-ALTER TABLE farthest_temp DROP COLUMN farthest_case;
 INSERT INTO farthest (farthest_step, farthest_num)
 SELECT farthest_step, farthest_num FROM farthest_temp;
 DROP TABLE farthest_temp;
@@ -91,7 +88,6 @@ LINES TERMINATED BY '\n';
 
 -- 整理数据到solution表中
 SELECT 'Collating solution table...' AS ' ';
-ALTER TABLE solution_temp DROP COLUMN min_solution_case;
 INSERT INTO solution (min_solution_step, min_solution_num, solution_num)
 SELECT min_solution_step, min_solution_num, solution_num FROM solution_temp;
 DROP TABLE solution_temp;
