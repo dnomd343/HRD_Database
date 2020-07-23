@@ -29,21 +29,71 @@
 
 ## 数据库下载
 
-### 下载地址
+### 完整数据库
+
+**表结构**
+
++ main(id, code, is_mirror, jiang_num, bing_num, style_num, group_num, group_index)
+
++ farthest(id, farthest_step, farthest_num)
+
++ solution(id, min_solution_step, min_solution_num, solution_num)
+
+**下载地址**
 
 + [腾讯微云](https://share.weiyun.com/5nj2lci4)
 
-+ [百度网盘](https://pan.baidu.com/s/13GtkrhbDbgA74X4MsuxYqQ)（提取码：9vef）
++ [百度网盘](https://pan.baidu.com/s/1mhDZPyIekzAv2s8Nd1g8_A)（提取码：d343）
 
 + [Github Release](https://github.com/dnomd343/HRD_Database/releases/download/v1.1/HRD_Database.7z)
 
-> HRD_Database.7z  
-> MD5: EC67E7E5AACD408367A3ECF3C61E7017
+**文件校验码**
 
-解压后SQL文件哈希值
+> HRD_Database.7z  
+> MD5: C2233DA977CD153F5E075F49077A2AC1
 
 > HRD_Database.sql  
-> MD5: B395E82B5E9E82E572DA8CB7683ECA41
+> MD5: 4D5E3FE372DFFFB39DA05BB7533840C6
+
+### 标准布局数据库
+
+**表结构**
+
++ main(id, short_code, code, style_num, group_num)
+
++ group_data(id, group_id, group_size)
+
++ farthest(id, farthest_step, farthest_num, farthest_case)
+
++ min_solution(id, min_solution_step, min_solution_num, min_solution_case)
+
++ solution(id, solution_num, solution_case)
+
+**MySQL版本下载地址**
+
++ [腾讯微云](https://share.weiyun.com/kDNIRURH)
+
++ [Github Release](https://github.com/dnomd343/HRD_Database/releases/download/v1.1/HRD_Database_standard.7z)
+
+**SQLite版本下载地址**
+
++ [腾讯微云](https://share.weiyun.com/WvNixqpY)
+
++ [Github Release](https://github.com/dnomd343/HRD_Database/releases/download/v1.1/HRD_Database_standard-sqlite.7z)
+
+**文件校验码**
+
+> HRD_Database_standard.7z  
+> 4AB1F5F58D8EE2007AD6AAAF3E983AA7
+
+> HRD_Database_standard.sql  
+> F61E62BEF15C8D583BEC6D2587E9285C
+
+> HRD_Database_standard-sqlite.7z  
+> F1ADF546480777585F5A7563200414E0
+
+> HRD_Database_standard.db  
+> CBC5E5E9471C0EFD3AF341FFE98468DA
 
 
 ## 数据库的使用
@@ -62,18 +112,20 @@
 > 用户名: hrd  
 > 密码: hrd_db
 
-+ 若可以接受命令行环境，请安装`mysql-client`，使用以下命令登录
++ 命令行环境下可安装`mysql-client`，使用以下命令登录
 
 > mysql -h 47.107.149.138 -P34326 -uhrd -phrd_db
 
-+ 若习惯图形化界面，请安装`Navicat`，按上方信息登录即可
++ 需要图形化界面可安装`Navicat`，按上方信息登录即可
 
 > 可以在这里得到免费版本的[Navicat](https://www.ghpym.com/navicat.html)
 
 
 ## 布署云端数据库
 
-首先在云服务器上导入hrd数据库，然后创建用户供他人使用
+服务器必须有公网IP，安装MySQL服务后导入数据库
+
+### 用户权限管理常用命令
 
 + 创建用户
 > create user hrd identified by 'hrd_db';
@@ -88,7 +140,7 @@
 > show grants for hrd;
 
 + 查看用户与对应主机
-> use mysql;
+> use mysql;  
 > select host, user from user;
 
 + 删除用户
