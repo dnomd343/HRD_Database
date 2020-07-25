@@ -7,6 +7,7 @@ using namespace std;
 
 class HRD_analy {
     public:
+        ~HRD_analy();
         struct Case_cal {
             bool freeze[4][5]; // true -> no move ; false -> can move
             unsigned char status[4][5]; // 0xFF -> undefined ; 0xFE -> space
@@ -34,18 +35,18 @@ class HRD_analy {
         unsigned long long Change_int(char str[10]);
         string Change_str(unsigned long long dat);
         bool Check_Code(unsigned long long code);
-        bool Parse_Code(unsigned long long Code);
+        bool Parse_Code(unsigned long long code);
         bool Is_Mirror(unsigned long long code);
         void Analyse_Case(unsigned long long code);
         void Output_Detail(string File_name);
         void Free_Data();
-        void Output_Graph(unsigned long long Code, unsigned int square_width, unsigned int square_gap, char str[2]);
+        void Output_Graph(unsigned long long code, unsigned int square_width, unsigned int square_gap, char str[2]);
 
     private:
-        vector <Case_cal *> Layer_hash[0x10000]; // 哈希表
         Case_cal *now_move_case;
+        vector <Case_cal *> *Layer_hash = new vector <Case_cal *> [0x10000]; // 哈希表
         unsigned int now_move_num, now_move_index; // 当前扫描节点的层编号 / 当前扫描节点的层中编号
-        bool Parse_Code(Case_cal &dat, unsigned long long Code);
+        bool Parse_Code(Case_cal &dat, unsigned long long code);
         void Get_Code(Case_cal &dat);
         void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
         void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);

@@ -5,7 +5,12 @@
 #include <fstream>
 #include "HRD_analy.h"
 
-void HRD_analy::Output_Graph(unsigned long long Code, unsigned int square_width, unsigned int square_gap, char str[3]) {
+HRD_analy::~HRD_analy() {
+    Free_Data();
+    delete[] Layer_hash;
+}
+
+void HRD_analy::Output_Graph(unsigned long long code, unsigned int square_width, unsigned int square_gap, char str[3]) {
     Case_cal dat;
     unsigned int i, j;
     unsigned int x, y;
@@ -24,7 +29,7 @@ void HRD_analy::Output_Graph(unsigned long long Code, unsigned int square_width,
             exclude[x][y] = false;
         }
     }
-    Parse_Code(dat, Code);
+    Parse_Code(dat, code);
     for (y = 0; y < 5; y++) { // 遍历20个格
         for (x = 0; x < 4; x++) {
             if (exclude[x][y] || dat.status[x][y] == 0xFE) {continue;} // 该格为空或已被占用
@@ -270,6 +275,8 @@ void HRD_analy::Free_Data() { // 释放上一次的计算结果
     unsigned int i, j;
     for (i = 0; i < Layer.size(); i++) { // 释放Layer中指向的全部节点
         for (j = 0; j < Layer[i].size(); j++) {
+            Layer[i][j]->source_case->clear();
+            Layer[i][j]->next_case->clear();
             delete Layer[i][j]->source_case;
             delete Layer[i][j]->next_case;
             delete Layer[i][j];
@@ -600,15 +607,15 @@ void HRD_analy::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code �
     dat.code &= 0xFFFFFFFFF; // 清除高28位内容
 }
 
-bool HRD_analy::Parse_Code(unsigned long long Code) { // 外部解析函数 结果储存在Parse_dat 返回编码正确性
+bool HRD_analy::Parse_Code(unsigned long long code) { // 外部解析函数 结果储存在Parse_dat 返回编码正确性
     Parse_dat.layer_num = Parse_dat.layer_index = 0;
-    return Parse_Code(Parse_dat, Code);
+    return Parse_Code(Parse_dat, code);
 }
 
-bool HRD_analy::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回false表示编码有误
+bool HRD_analy::Parse_Code(Case_cal &dat, unsigned long long code) { // 解析编码 返回false表示编码有误
     unsigned char range[16]; // dat低32位分16组
     int i, x, y, num, space_num = 0;
-    dat.code = Code;
+    dat.code = code;
     for (x = 0; x < 4; x++) { // 初始化status和freeze
         for (y = 0; y < 5; y++) {
             dat.status[x][y] = 0xFF;
@@ -620,16 +627,16 @@ bool HRD_analy::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析�
     }
     num = 0;
     for (i = 15; i >= 0; i--) { // 载入排列到range
-        range[i] = Code & 0x3;
+        range[i] = code & 0x3;
         if (range[i] == 0) {num++;}
-        Code >>= 2;
+        code >>= 2;
     }
     if (num < 2) {return false;} // 0的个数低于两个出错
-    if (Code > 14) {return false;} // 排除越界情况
-    if (Code % 4 == 3) {return false;}
+    if (code > 14) {return false;} // 排除越界情况
+    if (code % 4 == 3) {return false;}
     dat.type[0] = 0; // 载入2 * 2方块
-    x = Code % 4;
-    y = Code / 4;
+    x = code % 4;
+    y = code / 4;
     dat.status[x][y] = dat.status[x + 1][y] = dat.status[x][y + 1] = dat.status[x + 1][y + 1] = 0;
     num = x = y = 0;
     for (i = 0; i < 16; i++) {
