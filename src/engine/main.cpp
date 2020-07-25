@@ -38,9 +38,9 @@ bool code_check(string str) {
     return cal.Check_Code(checked_code);
 }
 
-void show_case(string str) {
+void show_case(string code_str) {
     unsigned long long code;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
@@ -54,9 +54,9 @@ void show_case(string str) {
     cout << endl;
 }
 
-void show_case(string str, string width) {
+void show_case(string code_str, string width) {
     unsigned long long code;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
@@ -73,10 +73,10 @@ void show_case(string str, string width) {
     cout << endl;
 }
 
-void cal_case(string str) {
+void cal_case(string code_str) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
@@ -96,16 +96,17 @@ void cal_case(string str) {
     cout << endl;
 }
 
-void cal_case(string str, string File_name) {
+void cal_case(string code_str, string File_name) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
-    HRD_cal cal;
     code = checked_code;
+    HRD_cal cal;
+    if (File_name == "%") {File_name = cal.Change_str(code) + ".txt";}
     cout << "Start code: " << cal.Change_str(code) << endl;
     dat = cal.Calculate(code);
     if (dat.size() == 0) {
@@ -130,16 +131,43 @@ void cal_case(string str, string File_name) {
     File_Output.close();
 }
 
-void cal_target(string str_1, string str_2) {
-    unsigned long long code, target;
-    vector <unsigned long long> dat;
-    if (code_check(str_1) == false) {
+void cal_path(string code_str, string File_name) {
+    unsigned long long code;
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
     code = checked_code;
-    if (code_check(str_2) == false) {
+    HRD_analy analy;
+    analy.quiet = true;
+    if (File_name == "%") {File_name = analy.Change_str(code) + ".txt";}
+    cout << "Start code: " << analy.Change_str(code) << endl;
+    analy.Analyse_Case(code);
+    if (analy.min_solution_step == -1) {
+        cout << "no solution" << endl;
+        return;
+    } else {
+        cout << "At least need " << analy.min_solution_step << " step" << endl;
+    }
+    cout << "min-step solution case(" << analy.min_solution_num <<"):" << endl;
+    for (unsigned int i = 0; i < analy.min_solution_case.size(); i++) {
+        cout << "  " << analy.Change_str(analy.min_solution_case[i]) << endl;
+    }
+    analy.Get_Path(analy.min_solution_case, File_name);
+    cout << "Data save at " << File_name << endl;
+}
+
+void cal_target(string code_str, string target_str) {
+    unsigned long long code, target;
+    vector <unsigned long long> dat;
+    if (code_check(code_str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    if (code_check(target_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
@@ -160,22 +188,23 @@ void cal_target(string str_1, string str_2) {
     cout << endl;
 }
 
-void cal_target(string str_1, string str_2, string File_name) {
+void cal_target(string code_str, string target_str, string File_name) {
     unsigned long long code, target;
     vector <unsigned long long> dat;
-    if (code_check(str_1) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
     code = checked_code;
-    if (code_check(str_2) == false) {
+    if (code_check(target_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
     target = checked_code;
     HRD_cal cal;
+    if (File_name == "%") {File_name = cal.Change_str(code) + "_" + cal.Change_str(target) + ".txt";}
     cout << "Start code: " << cal.Change_str(code) << endl;
     cout << "Target code: " << cal.Change_str(target) << endl;
     dat = cal.Calculate(code, target);
@@ -201,10 +230,44 @@ void cal_target(string str_1, string str_2, string File_name) {
     File_Output.close();
 }
 
-void cal_group(string str) {
+void cal_target_path(string code_str, vector <string> target_dat, string File_name) {
+    unsigned long long code;
+    vector <unsigned long long> target;
+    HRD_analy analy;
+    analy.quiet = true;
+    if (code_check(code_str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    for (unsigned int i = 0; i < target_dat.size(); i++) {
+        if (code_check(target_dat[i]) == false) {
+            cout << "target code error" << endl;
+            cout << endl;
+            return;
+        }
+        target.push_back(checked_code);
+    }
+    if (File_name == "%") {File_name = analy.Change_str(code) + ".txt";}
+    cout << "Start code: " << analy.Change_str(code) << endl;
+    cout << "Target code:" << endl;
+    for (unsigned int i = 0; i < target.size(); i++) {
+        cout << "  " << analy.Change_str(target[i]) << endl;
+    }
+    analy.Analyse_Case(code);
+    if (analy.Get_Path(target, File_name)) {
+        cout << "Data save at " << File_name << endl;
+    } else {
+        cout << "Target not found" << endl;
+    }
+    cout << endl;
+}
+
+void cal_group(string code_str) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
@@ -217,16 +280,17 @@ void cal_group(string str) {
     cout << endl;
 }
 
-void cal_group(string str, string File_name) {
+void cal_group(string code_str, string File_name) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
-    HRD_cal cal;
     code = checked_code;
+    HRD_cal cal;
+    if (File_name == "%") {File_name = cal.Change_str(code) + ".txt";}
     cout << "Start code: " << cal.Change_str(code) << endl;
     dat = cal.Calculate_All(code);
     sort(dat.begin(), dat.end());
@@ -243,10 +307,10 @@ void cal_group(string str, string File_name) {
     File_Output.close();
 }
 
-void analy_case(string str, bool quiet) {
+void analy_case(string code_str, bool quiet) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
@@ -260,16 +324,17 @@ void analy_case(string str, bool quiet) {
     analy.Free_Data();
 }
 
-void analy_case(string str, string File_name, bool quiet) {
+void analy_case(string code_str, string File_name, bool quiet) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
-    HRD_analy analy;
     code = checked_code;
+    HRD_analy analy;
+    if (File_name == "%") {File_name = analy.Change_str(code) + ".txt";}
     cout << "Start code: " << analy.Change_str(code) << endl;
     analy.quiet = quiet;
     analy.Analyse_Case(code);
@@ -284,25 +349,36 @@ void analy_case(string str, string File_name, bool quiet) {
     analy.Free_Data();
 }
 
-void analy_group(string str, string File_name_1, string File_name_2, bool is_all) {
+void analy_group(string code_str, string File_name_1, string File_name_2, bool is_all) {
     unsigned long long code;
     vector <unsigned long long> dat;
-    if (code_check(str) == false) {
+    if (code_check(code_str) == false) {
         cout << "code error" << endl;
         cout << endl;
         return;
     }
-    HRD_group group;
     code = checked_code;
+    HRD_group group;
+    if (File_name_1 == "%") {File_name_1 = "farthest_" + group.Change_str(code) + ".csv";}
+    if (File_name_2 == "%") {File_name_2 = "solution_" + group.Change_str(code) + ".csv";}
     cout << "Start code: " << group.Change_str(code) << endl;
     group.Batch_Analyse(code, File_name_1, File_name_2, is_all);
     cout << "Data save at " << File_name_1 << " and " << File_name_2 << endl;
     cout << endl;
 }
 
-void analy_multi_group(string str, string File_name_1, string File_name_2, bool is_all) {
+void analy_multi_group(string File_name_seed, string File_name_1, string File_name_2, bool is_all) {
     HRD_group group;
-    if (group.Multi_Analyse(str, File_name_1, File_name_2, is_all) == false) {
+    if (File_name_seed.substr(File_name_seed.length() - 4) == ".txt") {
+    	File_name_seed = File_name_seed.substr(0, File_name_seed.length() - 4);
+        if (File_name_1 == "%") {File_name_1 = "farthest_" + File_name_seed + ".csv";}
+        if (File_name_2 == "%") {File_name_2 = "solution_" + File_name_seed + ".csv";}
+        File_name_seed = File_name_seed + ".txt";
+    } else {
+        if (File_name_1 == "%") {File_name_1 = "farthest_" + File_name_seed + ".csv";}
+        if (File_name_2 == "%") {File_name_2 = "solution_" + File_name_seed + ".csv";}
+    }
+    if (group.Multi_Analyse(File_name_seed, File_name_1, File_name_2, is_all) == false) {
         cout << endl;
         return;
     }
@@ -325,14 +401,19 @@ void find_all_code(string File_name) {
     cout << "Warning: It will consume nearly 2GB of memory, please make sure there is enough memory!" << endl;
     cout << "Press ENTER to start...";
     cin.get();
+    if (File_name == "%") {File_name = "All_Case.txt";}
     statistic.Find_All_Case(File_name);
     cout << "Data save at " << File_name << endl;
     cout << endl;
 }
 
 void show_help() {
-    cout << "(version: v1.1)" << endl;
+    cout << "(version: v1.2)" << endl;
     cout << "Usage of HRD_engine:" << endl;
+    cout << endl;
+    cout << "  ~ 'code' will automatically fill '0' to 9 bits" << endl;
+    cout << endl;
+    cout << "  ~ use '%' to automatically generate 'file_name'" << endl;
     cout << endl;
     cout << "  --show <code> [square_width]" << endl;
     cout << "    Purpose: Visualize the <code>" << endl;
@@ -348,6 +429,14 @@ void show_help() {
     cout << "    Purpose: Find the shortest path from <code> to <target>" << endl;
     cout << "    eg: ./engine --cal-target 4FEA13400 43EA73400" << endl;
     cout << "        ./engine --cal-target 4FEA13400 43EA73400 demo.txt" << endl;
+    cout << endl;
+    cout << "  --cal-path <code> <file_name>" << endl;
+    cout << "    Purpose: Find all of the minimum step solution path of <code>" << endl;
+    cout << "    eg: ./engine --cal-path 4FEA13400 demo.txt" << endl;
+    cout << endl;
+    cout << "  --cal-target-path <code> <target_1> ... <target_n> <file_name>" << endl;
+    cout << "    Purpose: Find all of the shortest path from <code> to <target_1>...<target_n>" << endl;
+    cout << "    eg: ./engine --cal-target-path 1A9BF0C00 DAAF4CC00 AE2F2B400 demo.txt" << endl;
     cout << endl;
     cout << "  --group <code> [file_name]" << endl;
     cout << "    Purpose: Find all elements of the group where <code> located" << endl;
@@ -431,11 +520,27 @@ int main(int argc, char* argv[]) {
         } else {
             parameter_err();
         }
+    } else if (parameter == "--cal-path") {
+        if (argc == 4) {
+            cal_path(argv[2], argv[3]);
+        } else {
+            parameter_err();
+        }
     } else if (parameter == "--cal-target") {
         if (argc == 4) {
             cal_target(argv[2], argv[3]);
         } else if (argc == 5) {
             cal_target(argv[2], argv[3], argv[4]);
+        } else {
+            parameter_err();
+        }
+    } else if (parameter == "--cal-target-path") {
+        if (argc >= 5) {
+            vector <string> target;
+            for (int i = 3; i < argc - 1; i++) {
+                target.push_back(argv[i]);
+            }
+            cal_target_path(argv[2], target, argv[argc - 1]);
         } else {
             parameter_err();
         }
