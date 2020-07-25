@@ -100,6 +100,87 @@ void HRD_analy::Output_Graph(unsigned long long code, unsigned int square_width,
     cout << endl;
 }
 
+bool HRD_analy::Get_Path(vector <unsigned long long> target, string File_name) {
+    Case_cal *address;
+    unsigned int i, j, k, num;
+    struct Highlight_point {
+        bool flag;
+        unsigned int index;
+    };
+    vector < vector <Highlight_point> > Highlight;
+    Highlight.resize(Layer.size()); // 同步Layer的结构
+    for (i = 0; i < Highlight.size(); i++) {
+        Highlight[i].resize(Layer[i].size());
+        for (j = 0; j < Layer[i].size(); j++) {
+            Highlight[i][j].flag = false;
+        }
+    }
+    for (i = 0; i < target.size(); i++) {
+        if (!Search_Case(target[i], address)) {return false;}
+        Highlight[address->layer_num][address->layer_index].flag = true;
+    }
+    vector <Case_cal *> *case_list;
+    for (i = Layer.size() - 1; i > 0; i--) { // 反向遍历除第一层外的所有层
+        num = 0;
+        for (j = 0; j < Layer[i].size(); j++) { // 遍历层内元素
+            if (Highlight[i][j].flag) { // 若该元素被标识
+                case_list = Layer[i][j]->source_case;
+                for (k = 0; k < case_list->size(); k++) { // 遍历其下一步
+                    Highlight[i - 1][(*case_list->at(k)).layer_index].flag = true; // 标识
+                }
+                Highlight[i][j].index = num;
+                num++;
+            }
+        }
+    }
+    Highlight[0][0].index = 0;
+    ofstream output;
+    output.open(File_name);
+    output << "[Target]" << endl;
+    for (i = 0; i < target.size(); i++) {
+        output << Change_str(target[i]) << endl;
+    }
+    output << "[Layer]" << endl;
+    for (i = 0; i < Layer.size(); i++) { // 反向遍历除第一层外的所有层
+        if (Layer[i].size() == 0) {break;}
+        for (j = 0; j < Layer[i].size(); j++) { // 遍历层内元素
+            if (Highlight[i][j].flag) {
+                output << "(" << i << "," << Highlight[i][j].index << ") = " << Change_str(Layer[i][j]->code) << endl;
+            }
+        }
+    }
+    output << "[Next]" << endl;
+    for (i = 0; i < Layer.size(); i++) { // 反向遍历除第一层外的所有层
+        if (Layer[i].size() == 0) {break;}
+        for (j = 0; j < Layer[i].size(); j++) { // 遍历层内元素
+            if (Highlight[i][j].flag) {
+                output << "(" << i << "," << Highlight[i][j].index << ") ->";
+                case_list = Layer[i][j]->next_case;
+                for (k = 0; k < case_list->size(); k++) { // 遍历其下一步
+                    if (Highlight[i + 1][(*case_list->at(k)).layer_index].flag) {
+                        output << " (" << i + 1 << "," << Highlight[i + 1][(*case_list->at(k)).layer_index].index << ")";
+                    }
+                }
+                output << endl;
+            }
+        }
+    }
+    output.close();
+    return true;
+}
+
+bool HRD_analy::Search_Case(unsigned long long code, Case_cal* &dat) {
+    unsigned int i;
+    int hash_index = 0xffff & (code >> 16); // 取得哈希索引
+    for (i = 0; i < Layer_hash[hash_index].size(); i++) { // 遍历索引内容
+        if (Layer_hash[hash_index][i]->code == code) { // 发现目标
+            dat = Layer_hash[hash_index][i];
+            return true;
+        }
+    }
+    return false;
+}
+
 void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     unsigned int i, j, k;
     ofstream output;

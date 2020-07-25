@@ -18,7 +18,7 @@ class HRD_analy {
             vector <Case_cal *> *source_case;
             vector <Case_cal *> *next_case;
         };
-        vector <vector <Case_cal *> > Layer; // 储存全部层数据的节点
+        vector < vector <Case_cal *> > Layer; // 储存全部层数据的节点
         Case_cal Parse_dat;
         bool quiet = false; // true -> 静默模式  false -> 输出运算情况
         // 布局的基本参数
@@ -39,6 +39,7 @@ class HRD_analy {
         bool Is_Mirror(unsigned long long code);
         void Analyse_Case(unsigned long long code);
         void Output_Detail(string File_name);
+        bool Get_Path(vector <unsigned long long> target, string File_name);
         void Free_Data();
         void Output_Graph(unsigned long long code, unsigned int square_width, unsigned int square_gap, char str[2]);
 
@@ -53,6 +54,7 @@ class HRD_analy {
         void Find_Next_Case(Case_cal &dat_raw);
         void Add_Case(Case_cal *dat);
         void Calculate(unsigned long long code);
+        bool Search_Case(unsigned long long code, Case_cal* &dat);
 };
 
 #endif
