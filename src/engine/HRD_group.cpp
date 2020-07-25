@@ -58,27 +58,27 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
     unsigned int i, j, k;
     int hash_index;
     vector <Case *> List; // 全组数据
-    vector <Case *> List_hash[0x10000]; // 哈希索引
+    vector <Case *> *List_hash = new vector <Case *> [0x10000]; // 哈希索引
     for (i = 0; i < dat.size(); i++) { // 将数据注入到List中
         Case *temp = new Case;
-        temp->Code = dat[i];
+        temp->code = dat[i];
         List.push_back(temp);
     }
     for (i = 0; i < List.size(); i++) { // 构建哈希索引表
-        hash_index = 0xffff & (List[i]->Code >> 16);
+        hash_index = 0xffff & (List[i]->code >> 16);
         List_hash[hash_index].push_back(List[i]);
     }
     for (i = 0; i < List.size(); i++) { // 计算全部2 * 2块的位置
-        List[i]->addr_2x2 = List[i]->Code >> 32;
+        List[i]->addr_2x2 = List[i]->code >> 32;
     }
     vector <unsigned long long> next_code;
     for (i = 0; i < List.size(); i++) { // 构建关系网
-        next_code = Find_Next_Case(List[i]->Code); // 找到全部子布局
+        next_code = Find_Next_Case(List[i]->code); // 找到全部子布局
         for (j = 0; j < next_code.size(); j++) { // 遍历子布局
             hash_index = 0xffff & (next_code[j] >> 16); // 取得哈希索引
             for (k = 0; List_hash[hash_index].size(); k++) { // 搜索该索引
-                if (List_hash[hash_index][k]->Code == next_code[j]) { // 找到目标
-                    List[i]->Next.push_back(List_hash[hash_index][k]); // 链接目标位置
+                if (List_hash[hash_index][k]->code == next_code[j]) { // 找到目标
+                    List[i]->next.push_back(List_hash[hash_index][k]); // 链接目标位置
                     break; // 退出循环
                 }
             }
@@ -87,8 +87,8 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
     Case_detail *result;
     for(i = 0; i < List.size(); i++) { // 遍历整个队列
         for (k = 0; k < List.size(); k++) { // 初始化
-            List[k]->Layer_num = -1;
-            List[k]->Flag = false;
+            List[k]->layer_num = -1;
+            List[k]->flag = false;
         }
         result = Analyse_Case(List[i]); // 计算对应布局数据并储存到result中
         Output_detail(result);
@@ -100,6 +100,7 @@ void HRD_group::Analyse_Group(vector <unsigned long long> dat) { // 传入整个
     for (i = 0; i < List.size(); i++) { // 释放List数据
         delete List[i];
     }
+    delete[] List_hash;
 }
 
 void HRD_group::Output_detail(Case_detail *dat) {
@@ -146,36 +147,36 @@ HRD_group::Case_detail* HRD_group::Analyse_Case(Case *start) { // 根据关系�
     vector <Case *> case_list;
     Case_detail *dat = new Case_detail; // dat储存分析结果
     Case_detail_init(*dat); // 初始化
-    dat->code = start->Code;
-    start->Layer_num = 0; //令入口节点的层级为0
+    dat->code = start->code;
+    start->layer_num = 0; //令入口节点的层级为0
     case_list.push_back(start); // 加入队列中
     i = 0;
     while (i != case_list.size()) { // 找到所有元素后退出
         if ((*case_list[i]).addr_2x2 == 0xD) { // 2 * 2块在出口位置
-            if (!case_list[i]->Flag) { // 未被标识
-                dat->solution_case.push_back(case_list[i]->Code); // 判定为解
-                dat->solution_step.push_back(case_list[i]->Layer_num);
-                case_list[i]->Flag = true; // 进行标识
+            if (!case_list[i]->flag) { // 未被标识
+                dat->solution_case.push_back(case_list[i]->code); // 判定为解
+                dat->solution_step.push_back(case_list[i]->layer_num);
+                case_list[i]->flag = true; // 进行标识
             }
         }
-        for (k = 0; k < case_list[i]->Next.size(); k++) { // 检测目标布局的全部子布局
-            if ((*case_list[i]->Next[k]).Layer_num == -1) { // 若之前还未被搜索到
-                (*case_list[i]->Next[k]).Layer_num = case_list[i]->Layer_num + 1; // 记录层级信息
-                case_list.push_back(case_list[i]->Next[k]); // 加入搜索队列
+        for (k = 0; k < case_list[i]->next.size(); k++) { // 检测目标布局的全部子布局
+            if ((*case_list[i]->next[k]).layer_num == -1) { // 若之前还未被搜索到
+                (*case_list[i]->next[k]).layer_num = case_list[i]->layer_num + 1; // 记录层级信息
+                case_list.push_back(case_list[i]->next[k]); // 加入搜索队列
             }
-            if (case_list[i]->Flag) { // 若已经标识 则感染下一层的子布局
-                if ((*case_list[i]->Next[k]).Layer_num == case_list[i]->Layer_num + 1) { // 若为下一层
-                    (*case_list[i]->Next[k]).Flag = true; // 标识
+            if (case_list[i]->flag) { // 若已经标识 则感染下一层的子布局
+                if ((*case_list[i]->next[k]).layer_num == case_list[i]->layer_num + 1) { // 若为下一层
+                    (*case_list[i]->next[k]).flag = true; // 标识
                 }
             }
         }
         i++; // 搜索下一个布局
     }
     // 计算最远布局
-    dat->farthest_step = case_list[case_list.size() - 1]->Layer_num; // 得到最远步数
+    dat->farthest_step = case_list[case_list.size() - 1]->layer_num; // 得到最远步数
     for (int i = case_list.size() - 1; i >= 0; i--) { // 逆向搜索
-        if (case_list[i]->Layer_num == dat->farthest_step) { // 如果是最远布局
-            dat->farthest_case.push_back(case_list[i]->Code); // 加入记录
+        if (case_list[i]->layer_num == dat->farthest_step) { // 如果是最远布局
+            dat->farthest_case.push_back(case_list[i]->code); // 加入记录
         } else {
             break; // 退出搜索
         }
@@ -220,12 +221,12 @@ void HRD_group::Case_detail_init(Case_detail &dat) { // 初始化数据
     dat.solution_step.clear();
 }
 
-vector <unsigned long long> HRD_group::Find_Next_Case(unsigned long long Code) { // 找到下一步移动的情况(一步可以为同一块多次移动)
+vector <unsigned long long> HRD_group::Find_Next_Case(unsigned long long code) { // 找到下一步移动的情况(一步可以为同一块多次移动)
     int num, x, y, i, j;
     bool addr[4][5]; // 在Find_Sub_Case深搜中用于剪枝
     bool exclude[4][5]; // 排除已搜索过的块
     Case_cal dat;
-    Parse_Code(dat, Code);
+    Parse_Code(dat, code);
     for (y = 0; y < 5; y++) {
         for (x = 0; x < 4; x++) {
             if (dat.status[x][y] == 0xFE) { // 目标格为空
@@ -443,10 +444,10 @@ void HRD_group::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code �
     dat.code &= 0xFFFFFFFFF; // 清除高28位内容
 }
 
-bool HRD_group::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回false表示编码有误
+bool HRD_group::Parse_Code(Case_cal &dat, unsigned long long code) { // 解析编码 返回false表示编码有误
     unsigned char range[16]; // dat低32位分16组
     int i, x, y, num, space_num = 0;
-    dat.code = Code;
+    dat.code = code;
     for (x = 0; x < 4; x++) { // 初始化status和freeze
         for (y = 0; y < 5; y++) {
             dat.status[x][y] = 0xFF;
@@ -457,16 +458,16 @@ bool HRD_group::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析�
     }
     num = 0;
     for (i = 15; i >= 0; i--) { // 载入排列到range
-        range[i] = Code & 0x3;
+        range[i] = code & 0x3;
         if (range[i] == 0) {num++;}
-        Code >>= 2;
+        code >>= 2;
     }
     if (num < 2) {return false;} // 0的个数低于两个出错
-    if (Code > 14) {return false;} // 排除越界情况
-    if (Code % 4 == 3) {return false;}
+    if (code > 14) {return false;} // 排除越界情况
+    if (code % 4 == 3) {return false;}
     dat.type[0] = 0; // 载入2 * 2方块
-    x = Code % 4;
-    y = Code / 4;
+    x = code % 4;
+    y = code / 4;
     dat.status[x][y] = dat.status[x + 1][y] = dat.status[x][y + 1] = dat.status[x + 1][y + 1] = 0;
     num = x = y = 0;
     for (i = 0; i < 16; i++) {

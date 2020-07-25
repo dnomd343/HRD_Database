@@ -19,11 +19,11 @@ class HRD_group {
             unsigned char type[15]; // 0 -> 2 * 2 ; 1 -> 2 * 1 ; 2 -> 1 * 2 ; 3 -> 1 * 1
         };
         struct Case {
-            unsigned long long Code;
-            int Layer_num;
-            bool Flag;
+            unsigned long long code;
+            int layer_num;
+            bool flag;
             unsigned int addr_2x2;
-            vector <Case *> Next;
+            vector <Case *> next;
         };
         struct Case_detail {
             unsigned long long code;
@@ -42,11 +42,11 @@ class HRD_group {
         vector <unsigned long long> Next_Case_dat; // 储存Find_Next_Case找到的结果
         bool Output_solution_case; // 是否输出全部solution_case
 
-        bool Parse_Code(Case_cal &dat, unsigned long long Code);
+        bool Parse_Code(Case_cal &dat, unsigned long long code);
         void Get_Code(Case_cal &dat);
         void Find_Sub_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
         void Build_Case(Case_cal &dat, int &num, int x, int y, bool addr[4][5]);
-        vector <unsigned long long> Find_Next_Case(unsigned long long Code);
+        vector <unsigned long long> Find_Next_Case(unsigned long long code);
         void Case_detail_init(Case_detail &dat);
         Case_detail* Analyse_Case(Case *start);
         void Analyse_Group(vector <unsigned long long> dat);
