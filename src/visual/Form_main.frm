@@ -136,7 +136,7 @@ Begin VB.Form Form_main
       Caption         =   "功能"
       Begin VB.Menu menu_output_pic 
          Caption         =   "导出图片"
-         Begin VB.Menu ouput_pic_no_code 
+         Begin VB.Menu output_pic_no_code 
             Caption         =   "无编码图片"
          End
          Begin VB.Menu output_pic_with_code 
@@ -235,11 +235,11 @@ Private Sub Form_Load() ' 窗体初始化
   output.square_width = 1000
   Call Output_case(Form_main, case_main, output) ' 显示界面
 End Sub
-Private Sub ouput_pic_no_code_Click() ' 导出无编码图片
+Private Sub output_pic_no_code_Click() ' 导出无编码图片
   Call output_pic(False)
   MsgBox "图片已保存"
 End Sub
-Private Sub ouput_pic_with_code_Click() ' 导出带编码图片
+Private Sub output_pic_with_code_Click() ' 导出带编码图片
   Call output_pic(True)
   MsgBox "图片已保存"
 End Sub
