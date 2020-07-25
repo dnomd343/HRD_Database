@@ -3,15 +3,19 @@
 #include <string>
 #include "HRD_cal.h"
 
-vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { // 寻找整个群的全部元素
+HRD_cal::~HRD_cal() {
+    delete[] List_hash;
+}
+
+vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long code) { // 寻找整个群的全部元素
     unsigned int i;
     vector <unsigned long long> data;
     init_data(); // 初始化
     mode = 0; // 设置模式为全集计算
-    if (!Check_Code(Code)) { // 编码错误
+    if (!Check_Code(code)) { // 编码错误
         return data; // 返回空序列
     }
-    cal(Code); // 进行广搜
+    cal(code); // 进行广搜
     for (i = 0; i < List.size(); i++) {
         data.push_back(List[i]->code); // 储存计算结果
     }
@@ -19,19 +23,19 @@ vector <unsigned long long> HRD_cal::Calculate_All(unsigned long long Code) { //
     return data;
 }
 
-vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned long long target) { // 寻找到target的最短路径
+vector <unsigned long long> HRD_cal::Calculate(unsigned long long code, unsigned long long target) { // 寻找到target的最短路径
     vector <unsigned long long> temp;
-    if (!(Check_Code(Code) && Check_Code(target))) { // 编码错误
+    if (!(Check_Code(code) && Check_Code(target))) { // 编码错误
         return temp; // 返回空序列
     }
-    if (Code == target) { // 若输入为target
-        temp.push_back(Code);
+    if (code == target) { // 若输入为target
+        temp.push_back(code);
         return temp;
     }
     init_data(); // 初始化
     mode = 2; // 设置模式为寻找特定目标
     target_code = target;
-    cal(Code); // 进行广搜
+    cal(code); // 进行广搜
     if (flag) { // 若找到目标
         return Get_Path(result);
     } else { // 未找到目标
@@ -40,18 +44,18 @@ vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code, unsigned
     }
 }
 
-vector <unsigned long long> HRD_cal::Calculate(unsigned long long Code) { // 寻找最少步解
+vector <unsigned long long> HRD_cal::Calculate(unsigned long long code) { // 寻找最少步解
     vector <unsigned long long> temp;
-    if (!Check_Code(Code)) { // 编码错误
+    if (!Check_Code(code)) { // 编码错误
         return temp; // 返回空序列
     }
-    if ((Code >> 32) == 0xD) { // 若输入已经为解
-        temp.push_back(Code);
+    if ((code >> 32) == 0xD) { // 若输入已经为解
+        temp.push_back(code);
         return temp;
     }
     init_data(); // 初始化
     mode = 1; // 设置模式为寻解
-    cal(Code); // 进行广搜
+    cal(code); // 进行广搜
     if (flag) { // 若找到解
         return Get_Path(result);
     } else { // 无解
@@ -86,17 +90,17 @@ void HRD_cal::init_data() { // 初始化数据结构
     List_source.clear();
 }
 
-bool HRD_cal::Check_Code(unsigned long long Code) { // 检查编码: 错误 -> false / 正确 -> true
+bool HRD_cal::Check_Code(unsigned long long code) { // 检查编码: 错误 -> false / 正确 -> true
     Case_cal dat;
-    return Parse_Code(dat, Code);
+    return Parse_Code(dat, code);
 }
 
-void HRD_cal::cal(unsigned long long Code) { // 广搜寻找目标
+void HRD_cal::cal(unsigned long long code) { // 广搜寻找目标
     Case_cal *start = new Case_cal;
     now_move = 0; // 设置起始搜索节点编号为0
     result = 0;
     flag = false; // 设置为暂未找到
-    if (!Parse_Code(*start, Code)) { // 若输入编码错误 退出
+    if (!Parse_Code(*start, code)) { // 若输入编码错误 退出
         delete start;
         return;
     }
@@ -371,10 +375,10 @@ void HRD_cal::Get_Code(Case_cal &dat) { // 获取编码并存储在dat.code 输�
     dat.code &= 0xFFFFFFFFF; // 清除高28位内容
 }
 
-bool HRD_cal::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编码 返回false表示编码有误
+bool HRD_cal::Parse_Code(Case_cal &dat, unsigned long long code) { // 解析编码 返回false表示编码有误
     unsigned char range[16]; // dat低32位分16组
     int i, x, y, num, space_num = 0;
-    dat.code = Code;
+    dat.code = code;
     for (x = 0; x < 4; x++) { // 初始化status和freeze
         for (y = 0; y < 5; y++) {
             dat.status[x][y] = 0xFF;
@@ -386,16 +390,16 @@ bool HRD_cal::Parse_Code(Case_cal &dat, unsigned long long Code) { // 解析编�
     }
     num = 0;
     for (i = 15; i >= 0; i--) { // 载入排列到range
-        range[i] = Code & 0x3;
+        range[i] = code & 0x3;
         if (range[i] == 0) {num++;}
-        Code >>= 2;
+        code >>= 2;
     }
     if (num < 2) {return false;} // 0的个数低于两个出错
-    if (Code > 14) {return false;} // 排除越界情况
-    if (Code % 4 == 3) {return false;}
+    if (code > 14) {return false;} // 排除越界情况
+    if (code % 4 == 3) {return false;}
     dat.type[0] = 0; // 载入2 * 2方块
-    x = Code % 4;
-    y = Code / 4;
+    x = code % 4;
+    y = code / 4;
     dat.status[x][y] = dat.status[x + 1][y] = dat.status[x][y + 1] = dat.status[x + 1][y + 1] = 0;
     num = x = y = 0;
     for (i = 0; i < 16; i++) {
