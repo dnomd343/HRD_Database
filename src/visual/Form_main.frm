@@ -2,10 +2,10 @@ VERSION 5.00
 Begin VB.Form Form_main 
    AutoRedraw      =   -1  'True
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "HRD Visual v1.1 by Dnomd343"
+   Caption         =   "HRD Visual"
    ClientHeight    =   6495
    ClientLeft      =   45
-   ClientTop       =   390
+   ClientTop       =   690
    ClientWidth     =   4815
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
@@ -13,6 +13,30 @@ Begin VB.Form Form_main
    ScaleHeight     =   6495
    ScaleWidth      =   4815
    StartUpPosition =   2  '屏幕中心
+   Begin VB.PictureBox Picture_Print 
+      Appearance      =   0  'Flat
+      AutoRedraw      =   -1  'True
+      BackColor       =   &H80000005&
+      BorderStyle     =   0  'None
+      BeginProperty Font 
+         Name            =   "微软雅黑"
+         Size            =   9
+         Charset         =   134
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H80000008&
+      Height          =   15
+      Left            =   0
+      ScaleHeight     =   15
+      ScaleWidth      =   15
+      TabIndex        =   5
+      Top             =   0
+      Visible         =   0   'False
+      Width           =   15
+   End
    Begin VB.Timer Timer_Tip 
       Enabled         =   0   'False
       Interval        =   1200
@@ -67,11 +91,30 @@ Begin VB.Form Form_main
       Top             =   5900
       Width           =   2040
    End
+   Begin VB.Label Label_Print 
+      AutoSize        =   -1  'True
+      BeginProperty Font 
+         Name            =   "微软雅黑"
+         Size            =   9
+         Charset         =   134
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   15
+      Left            =   0
+      TabIndex        =   6
+      Top             =   0
+      Visible         =   0   'False
+      Width           =   15
+   End
    Begin VB.Label Label_Tip 
       Alignment       =   2  'Center
       Appearance      =   0  'Flat
       AutoSize        =   -1  'True
       BackColor       =   &H80000005&
+      BackStyle       =   0  'Transparent
       BeginProperty Font 
          Name            =   "微软雅黑"
          Size            =   12
@@ -89,6 +132,68 @@ Begin VB.Form Form_main
       Visible         =   0   'False
       Width           =   15
    End
+   Begin VB.Menu menu_function 
+      Caption         =   "功能"
+      Begin VB.Menu menu_output_pic 
+         Caption         =   "导出图片"
+         Begin VB.Menu ouput_pic_no_code 
+            Caption         =   "无编码图片"
+         End
+         Begin VB.Menu output_pic_with_code 
+            Caption         =   "带编码图片"
+         End
+      End
+      Begin VB.Menu menu_analyse_code 
+         Caption         =   "解析编码"
+      End
+      Begin VB.Menu menu_get_code 
+         Caption         =   "生成编码"
+      End
+      Begin VB.Menu menu_clear 
+         Caption         =   "清空显示"
+      End
+   End
+   Begin VB.Menu menu_setting 
+      Caption         =   "设置"
+      Begin VB.Menu menu_on_top 
+         Caption         =   "窗口最上"
+         Checked         =   -1  'True
+      End
+      Begin VB.Menu menu_is_tip 
+         Caption         =   "输出提示"
+         Checked         =   -1  'True
+      End
+      Begin VB.Menu menu_skin 
+         Caption         =   "外观颜色"
+         Begin VB.Menu skin_white 
+            Caption         =   "极简白"
+         End
+         Begin VB.Menu skin_blue 
+            Caption         =   "胖次蓝"
+         End
+         Begin VB.Menu skin_yellow 
+            Caption         =   "土豪金"
+         End
+         Begin VB.Menu skin_green 
+            Caption         =   "原谅绿"
+         End
+         Begin VB.Menu skin_pink 
+            Caption         =   "木耳粉"
+         End
+      End
+   End
+   Begin VB.Menu menu_help 
+      Caption         =   "帮助"
+      Begin VB.Menu usage 
+         Caption         =   "使用说明"
+      End
+      Begin VB.Menu update 
+         Caption         =   "检查更新"
+      End
+      Begin VB.Menu about 
+         Caption         =   "关于"
+      End
+   End
 End
 Attribute VB_Name = "Form_main"
 Attribute VB_GlobalNameSpace = False
@@ -104,19 +209,144 @@ Dim output As Case_size ' 输出大小
 Dim case_main As Case_detail ' 布局信息
 Dim exclude(-1 To 1, -1 To 1) As Boolean ' 记录按下位置周围是否能放置棋子 true -> 不难 / false -> 能
 Private Sub Form_Load() ' 窗体初始化
+  Form_main.Caption = Form_main.Caption & " " & version
   Call Init_case
+  Call Get_settings ' 读取上一次的设置
+  menu_on_top.Checked = Not on_top: Call menu_on_top_Click
+  menu_is_tip.Checked = Not is_tip: Call menu_is_tip_Click
+  If style_color = "white" Then
+    Call skin_white_Click
+  ElseIf style_color = "blue" Then
+    Call skin_blue_Click
+  ElseIf style_color = "yellow" Then
+    Call skin_yellow_Click
+  ElseIf style_color = "green" Then
+    Call skin_green_Click
+  ElseIf style_color = "pink" Then
+    Call skin_pink_Click
+  Else
+    Call skin_blue_Click
+  End If
+  Call Save_settings ' 保存设置
   print_now = False
   output.start_x = 150
   output.start_y = 150
   output.gap = 100
   output.square_width = 1000
-  style.block_line_width = 1
-  style.case_line_width = 2
-  style.block_line_color = RGB(0, 158, 240)
-  style.case_line_color = RGB(0, 158, 240)
-  style.block_color = RGB(225, 245, 255)
-  style.case_color = RGB(248, 254, 255)
   Call Output_case(Form_main, case_main, output) ' 显示界面
+End Sub
+Private Sub ouput_pic_no_code_Click() ' 导出无编码图片
+  Call output_pic(False)
+  MsgBox "图片已保存"
+End Sub
+Private Sub ouput_pic_with_code_Click() ' 导出带编码图片
+  Call output_pic(True)
+  MsgBox "图片已保存"
+End Sub
+Private Sub menu_analyse_code_Click() ' 解析编码
+  If Try_parse_code(Text_Code) = False Then
+    MsgBox "编码错误"
+  Else
+    Text_Code = UCase(Text_Code) & String(9 - Len(Text_Code), "0") ' 修改为大写并补0
+    MsgBox "解析完成"
+  End If
+End Sub
+Private Sub menu_get_code_Click() ' 生成编码
+  Call Try_get_code
+  If case_main.kind(0) <> 0 Then
+    Text_Focus.SetFocus ' 防止文本框光标闪烁
+    MsgBox "2 * 2块未确定"
+    Text_Code.ForeColor = vbBlack
+    Text_Code = "---"
+  Else
+    Text_Code = Text_Code & String(9 - Len(Text_Code), "0") ' 补0
+    Text_Code.ForeColor = vbBlack
+    MsgBox "编码：" & Text_Code
+  End If
+End Sub
+Private Sub menu_clear_Click() ' 清空显示
+  Call Command_Clear_Click
+  Text_Code = "---"
+End Sub
+Private Sub menu_on_top_Click() ' 是否出口最上
+  menu_on_top.Checked = Not menu_on_top.Checked
+  on_top = menu_on_top.Checked
+  If on_top = True Then
+    SetWindowPos Me.hwnd, -1, 0, 0, 0, 0, 1 Or 2
+  Else
+    SetWindowPos Me.hwnd, -2, 0, 0, 0, 0, 1 Or 2
+  End If
+  Call Save_settings
+End Sub
+Private Sub menu_is_tip_Click() ' 是否显示提示
+  menu_is_tip.Checked = Not menu_is_tip.Checked
+  is_tip = menu_is_tip.Checked
+  Call Save_settings
+End Sub
+Private Sub skin_white_Click() ' 白色皮肤
+  Call skin_empty
+  skin_white.Checked = True
+  style_color = "white"
+  Call load_skin(white_style)
+End Sub
+Private Sub skin_blue_Click() ' 蓝色皮肤
+  Call skin_empty
+  skin_blue.Checked = True
+  style_color = "blue"
+  Call load_skin(blue_style)
+End Sub
+Private Sub skin_yellow_Click() ' 黄色皮肤
+  Call skin_empty
+  skin_yellow.Checked = True
+  style_color = "yellow"
+  Call load_skin(yellow_style)
+End Sub
+Private Sub skin_green_Click() ' 绿色皮肤
+  Call skin_empty
+  skin_green.Checked = True
+  style_color = "green"
+  Call load_skin(green_style)
+End Sub
+Private Sub skin_pink_Click() ' 粉色皮肤
+  Call skin_empty
+  skin_pink.Checked = True
+  style_color = "pink"
+  Call load_skin(pink_style)
+End Sub
+Private Sub skin_empty() ' 清除所有皮肤项勾选
+  skin_white.Checked = False
+  skin_blue.Checked = False
+  skin_yellow.Checked = False
+  skin_green.Checked = False
+  skin_pink.Checked = False
+End Sub
+Private Sub load_skin(new_style As Case_style) ' 载入皮肤
+  style.block_line_width = new_style.block_line_width
+  style.case_line_width = new_style.case_line_width
+  style.block_line_color = new_style.block_line_color
+  style.case_line_color = new_style.case_line_color
+  style.block_color = new_style.block_color
+  style.case_color = new_style.case_color
+  Call Output_case(Form_main, case_main, output)
+  Call Save_settings
+End Sub
+Private Sub usage_click() ' 使用说明
+  Dim usage_data As String
+  usage_data = usage_data & "· 鼠标拖拽画出棋子" & vbCrLf
+  usage_data = usage_data & "· 单击删除棋子" & vbCrLf
+  usage_data = usage_data & "· 输入编码自动生成布局" & vbCrLf
+  usage_data = usage_data & "· 双击文本框可清空内容" & vbCrLf
+  usage_data = usage_data & "· 清除按钮可清空上方内容" & vbCrLf
+  usage_data = usage_data & "· 完成按钮可补0生成九位编码" & vbCrLf
+  usage_data = usage_data & "· 空白处右键可导出无编码图片" & vbCrLf
+  usage_data = usage_data & "· 空白处点击滚轮可导出带编码图片" & vbCrLf
+  MsgBox usage_data, , "使用说明"
+End Sub
+Private Sub update_Click() ' 检查更新
+  Call Check_update
+End Sub
+Private Sub about_Click() ' 关于
+  MsgBox "HRD Visual：华容道编码可视化工具" & vbCrLf & "    版本：" & version & "  (by Dnomd343)", , "关于"
 End Sub
 Private Sub Command_Clear_Click() ' 清除当前显示
   Call Init_case
@@ -153,6 +383,26 @@ Private Sub Text_Code_KeyPress(KeyAscii As Integer) ' 文本框输入内容
     Timer_KeyPress.Enabled = True
   End If
 End Sub
+Private Sub output_pic(with_code As Boolean)  ' 导出图片 可选择带不带编码
+  Picture_Print.Width = output.start_x * 2 + output.square_width * 4 + output.gap * 5  ' 设置图片大小
+  Picture_Print.Height = output.start_y * 2 + output.square_width * 5 + output.gap * 6
+  If with_code = True Then Picture_Print.Height = Picture_Print.Height + 1000
+  Picture_Print.Cls
+  Picture_Print.BackColor = vbWhite
+  If with_code = True Then
+    Picture_Print.FontSize = 36
+    Picture_Print.CurrentX = (Picture_Print.Width - Get_str_width(Text_Code)) / 2  ' 设置输出编码文字的位置
+    Picture_Print.CurrentY = output.start_y * 2 + output.square_width * 5 + output.gap * 6
+    Picture_Print.Print Text_Code
+  End If
+  Call Output_case(Picture_Print, case_main, output)  ' 显示布局
+  SavePicture Picture_Print.Image, Text_Code & ".bmp"  ' 保存图片
+End Sub
+Private Function Get_str_width(str As String) As Integer ' 获取字符串显示时的宽度
+  Label_Print.FontSize = Picture_Print.FontSize
+  Label_Print = str ' 载入到Label中 利用自动大小计算
+  Get_str_width = Label_Print.Width
+End Function
 Private Function Try_parse_code(code As String) As Boolean ' 尝试解码
   Dim i As Integer, dat As String, flag As Boolean
   If Len(code) > 9 Then Try_parse_code = False: Exit Function ' 输入超9位 退出
@@ -196,10 +446,10 @@ Private Sub Timer_KeyPress_Timer()
   Timer_KeyPress.Enabled = False
 End Sub
 Private Sub Show_tip(tip_data As String) ' 显示提示 1.2s后消失
+  If is_tip = False Then Exit Sub
   Timer_Tip.Enabled = False ' 防止闪烁
   Label_Tip = tip_data
   Label_Tip.ForeColor = style.block_line_color
-  Label_Tip.BackColor = style.block_color
   Label_Tip.Top = (Form_main.Height - Label_Tip.Height) / 2 - 480
   Label_Tip.Left = (Form_main.Width - Label_Tip.Width) / 2 - 60
   Label_Tip.Visible = True
@@ -211,6 +461,7 @@ Private Sub Timer_Tip_Timer()
 End Sub
 Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single) ' 按下鼠标按键
   Text_Focus.SetFocus
+  If Button <> 1 Then Exit Sub
   Dim x_ As Integer, y_ As Integer, num As Integer
   Dim raw_x As Single, raw_y As Single
   Dim addr_x As Integer, addr_y As Integer
@@ -240,6 +491,7 @@ Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y A
   If clear = True Then ' 若被标识为点击在棋子上
     Call Clear_block(num) ' 清除该棋子
     Call Output_case(Form_main, case_main, output) ' 刷新显示界面
+    Text_Code.ForeColor = vbBlack
     Text_Code = "---"
     Call Try_get_code
     Exit Sub ' 退出
@@ -305,11 +557,20 @@ Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As Single, y A
   Call Print_Block(Form_main, print_x, print_y, print_width, print_height, style.block_line_width, style.block_color, style.block_line_color) ' 绘制
 End Sub
 Private Sub Form_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single) ' 释放鼠标按键
+  If Button = 2 Or Button = 4 Then ' 如果按下滚轮或右键
+    If Text_Code.ForeColor = vbRed Then Show_tip ("编码有问题哦"): Exit Sub
+    If Button = 2 Then Call output_pic(False) ' 按下右键 不带编码
+    If Button = 4 Then Call output_pic(True) ' 按下滚轮 带编码
+    Call Show_tip("图片已保存")
+    Exit Sub
+  End If
   Dim i As Integer, j As Integer, num As Integer
   Dim block_x As Integer, block_y As Integer
   Dim block_width As Integer, block_height As Integer
   If print_now = False Then Exit Sub ' 判断是否在绘制模式
   print_now = False ' 退出绘制模式
+  Text_Code.ForeColor = vbBlack
+  If case_main.kind(0) <> 0 Then Text_Code = "---"
   block_x = min(click_x, mouse_x) - 1 ' 计算绘制棋子的起始位置
   block_y = min(click_y, mouse_y) - 1
   block_width = Abs(click_x - mouse_x) + 1 ' 计算绘制棋子的宽和高

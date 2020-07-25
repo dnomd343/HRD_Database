@@ -1,29 +1,11 @@
-Attribute VB_Name = "Module"
+Attribute VB_Name = "Module_hrd"
 Option Explicit
 Type Case_detail
   status(0 To 3, 0 To 4) As Integer ' 255 -> undefined ; 254 -> space
   kind(0 To 14) As Integer ' 0 -> 2 * 2 ; 1 -> 2 * 1 ; 2 -> 1 * 2 ; 3 -> 1 * 1
   code As String ' length -> 9
 End Type
-Type Case_size ' 记录棋盘的大小
-  start_x As Integer
-  start_y As Integer
-  square_width As Integer
-  gap As Integer
-End Type
-Type Case_style ' 记录显示的颜色与边框粗细
-  block_line_width As Integer
-  case_line_width As Integer
-  block_line_color As OLE_COLOR
-  case_line_color As OLE_COLOR
-  block_color As OLE_COLOR
-  case_color As OLE_COLOR
-End Type
 Public Parse_data As Case_detail ' 解析编码的返回数据
-Public style As Case_style ' 通用显示样式
-Sub main() ' 程序入口
-  Form_main.Show
-End Sub
 Public Sub Output_case(obj, case_data As Case_detail, case_output As Case_size) ' 将输入的布局显示到obj上
   Dim i As Integer, x As Integer, y As Integer
   Dim block_type As Integer
@@ -77,7 +59,7 @@ Public Sub Print_Block(obj, print_start_x, print_start_y, print_width, print_hei
 End Sub
 Function change_str(dat As Integer) As String ' 输入一个十六进制位 转化为字符串返回
   If dat <= 9 And dat >= 0 Then
-    change_str = Str(dat)
+    change_str = str(dat)
   ElseIf dat >= 10 And dat <= 15 Then
     change_str = Chr(dat + 55)
   Else
