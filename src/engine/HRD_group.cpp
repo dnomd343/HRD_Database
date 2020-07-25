@@ -19,6 +19,8 @@ bool HRD_group::Multi_Analyse(string seed_File_name, string name_farthest, strin
     while (input_seed.eof() != true) { // 从外部文件读入列表
         input_seed >> str;
         seed.push_back(Change_int(str));
+        input_seed.get();
+        if (input_seed.peek() == '\n') {break;}
     }
     for (unsigned int i = 0; i < seed.size(); i++) { // 判断编码正确性
         if (!cal.Check_Code(seed[i])) {
