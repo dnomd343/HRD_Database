@@ -22,6 +22,7 @@ class HRD_analy {
         Case_cal Parse_dat;
         bool quiet = false; // true -> 静默模式  false -> 输出运算情况
         // 布局的基本参数
+        int stop_point_num; // 端点的个数
         int min_solution_step; // 最少的步数
         int min_solution_num; // 最少步解的个数
         vector <unsigned long long> min_solution_case; // 所有最少步解
@@ -39,8 +40,9 @@ class HRD_analy {
         bool Is_Mirror(unsigned long long code);
         void Analyse_Case(unsigned long long code);
         void Output_Detail(string File_name);
-        bool Get_Path(vector <unsigned long long> target, string File_name);
         void Free_Data();
+        void Output_All_Path(string File_name);
+        bool Output_Path(vector <unsigned long long> target, string File_name);
         void Output_Graph(unsigned long long code, unsigned int square_width, unsigned int square_gap, char str[2]);
 
     private:

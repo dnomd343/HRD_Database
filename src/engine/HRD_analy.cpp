@@ -100,7 +100,7 @@ void HRD_analy::Output_Graph(unsigned long long code, unsigned int square_width,
     cout << endl;
 }
 
-bool HRD_analy::Get_Path(vector <unsigned long long> target, string File_name) {
+bool HRD_analy::Output_Path(vector <unsigned long long> target, string File_name) {
     Case_cal *address;
     unsigned int i, j, k, num;
     struct Highlight_point {
@@ -181,6 +181,34 @@ bool HRD_analy::Search_Case(unsigned long long code, Case_cal* &dat) {
     return false;
 }
 
+void HRD_analy::Output_All_Path(string File_name) {
+    ofstream output;
+    unsigned int i, j, k;
+    output.open(File_name);
+    output << "[Target]" << endl;
+    output << "[Layer]" << endl;
+    for (i = 0; i < Layer.size(); i++) {
+        for (j = 0; j < Layer[i].size(); j++) {
+            output << "(" << i << "," << j << ") = ";
+            output << Change_str((*Layer[i][j]).code) << endl;
+        }
+    }
+    vector <Case_cal *> *case_list;
+    output << "[Next]" << endl;
+    for (i = 0; i < Layer.size(); i++) {
+        for (j = 0; j < Layer[i].size(); j++) {
+            case_list = Layer[i][j]->next_case;
+            output << "(" << i << "," << j << ") ->";
+            for (k = 0; k < case_list->size(); k++) {
+                output << " (" << (*case_list->at(k)).layer_num;
+                output << "," << (*case_list->at(k)).layer_index << ")";
+            }
+            output << endl;
+        }
+    }
+    output.close();
+}
+
 void HRD_analy::Output_Detail(string File_name) { // 输出分析结果到文件
     unsigned int i, j, k;
     ofstream output;
@@ -255,6 +283,7 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     vector < vector <bool> > solution_flag;
     vector <unsigned long long> temp;
     unsigned int i, j, k;
+    stop_point_num = 0;
     farthest_step = -1; // 初始化farthest
     farthest_num = 0;
     farthest_case.clear();
@@ -277,6 +306,14 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
     }
     farthest_num = farthest_case.size();
     sort(farthest_case.begin(), farthest_case.end());  //得到的结果进行排序
+    // 获取端点个数
+    for (i = 0; i < Layer.size(); i++) {
+        for (j = 0; j < Layer[i].size(); j++) {
+            if (Layer[i][j]->next_case->size() == 0) {
+                stop_point_num++;
+            }
+        }
+    }
     // 获取最少步解
     for (i = 0; i < Layer.size(); i++) {
         for (j = 0; j < Layer[i].size(); j++) {
@@ -327,8 +364,9 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
         }
     }
     solution_num = solution_case.size();
-
     if (quiet) {return;} // 若quiet为true则不输出
+    cout << "---------------------------" << endl;
+    cout << "stop_point_num = " << stop_point_num << endl;
     cout << "---------------------------" << endl;
     cout << "farthest_step = " << farthest_step << endl;
     cout << "farthest_num = " << farthest_num << endl;

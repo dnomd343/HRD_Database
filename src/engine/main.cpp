@@ -154,7 +154,53 @@ void cal_path(string code_str, string File_name) {
     for (unsigned int i = 0; i < analy.min_solution_case.size(); i++) {
         cout << "  " << analy.Change_str(analy.min_solution_case[i]) << endl;
     }
-    analy.Get_Path(analy.min_solution_case, File_name);
+    analy.Output_Path(analy.min_solution_case, File_name);
+    cout << "Data save at " << File_name << endl;
+}
+
+void cal_solution_path(string code_str, string File_name) {
+    unsigned long long code;
+    if (code_check(code_str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    HRD_analy analy;
+    analy.quiet = true;
+    if (File_name == "%") {File_name = analy.Change_str(code) + ".txt";}
+    cout << "Start code: " << analy.Change_str(code) << endl;
+    analy.Analyse_Case(code);
+    if (analy.min_solution_step == -1) {
+        cout << "no solution" << endl;
+        return;
+    }
+    cout << "solution case(" << analy.solution_num <<"):" << endl;
+    for (unsigned int i = 0; i < analy.solution_case.size(); i++) {
+        cout << "  " << analy.Change_str(analy.solution_case[i]) << "(" << analy.solution_step[i] << ")" << endl;
+    }
+    analy.Output_Path(analy.solution_case, File_name);
+    cout << "Data save at " << File_name << endl;
+}
+
+void cal_farthest_path(string code_str, string File_name) {
+    unsigned long long code;
+    if (code_check(code_str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    HRD_analy analy;
+    analy.quiet = true;
+    if (File_name == "%") {File_name = analy.Change_str(code) + ".txt";}
+    cout << "Start code: " << analy.Change_str(code) << endl;
+    analy.Analyse_Case(code);
+    cout << "farthest case(" << analy.farthest_num <<"):" << endl;
+    for (unsigned int i = 0; i < analy.farthest_case.size(); i++) {
+        cout << "  " << analy.Change_str(analy.farthest_case[i]) << endl;
+    }
+    analy.Output_Path(analy.farthest_case, File_name);
     cout << "Data save at " << File_name << endl;
 }
 
@@ -256,7 +302,7 @@ void cal_target_path(string code_str, vector <string> target_dat, string File_na
         cout << "  " << analy.Change_str(target[i]) << endl;
     }
     analy.Analyse_Case(code);
-    if (analy.Get_Path(target, File_name)) {
+    if (analy.Output_Path(target, File_name)) {
         cout << "Data save at " << File_name << endl;
     } else {
         cout << "Target not found" << endl;
@@ -305,6 +351,24 @@ void cal_group(string code_str, string File_name) {
     }
     cout << endl;
     File_Output.close();
+}
+
+void cal_group_path(string code_str, string File_name) {
+    unsigned long long code;
+    if (code_check(code_str) == false) {
+        cout << "code error" << endl;
+        cout << endl;
+        return;
+    }
+    code = checked_code;
+    HRD_analy analy;
+    analy.quiet = true;
+    if (File_name == "%") {File_name = analy.Change_str(code) + ".txt";}
+    cout << "Start code: " << analy.Change_str(code) << endl;
+    analy.Analyse_Case(code);
+    cout << "stop_point_num: " << analy.stop_point_num << endl;
+    analy.Output_All_Path(File_name);
+    cout << "Data save at " << File_name << endl;
 }
 
 void analy_case(string code_str, bool quiet) {
@@ -434,6 +498,14 @@ void show_help() {
     cout << "    Purpose: Find all of the minimum step solution path of <code>" << endl;
     cout << "    eg: ./engine --cal-path 4FEA13400 demo.txt" << endl;
     cout << endl;
+    cout << "  --cal-solution-path <code> <file_name>" << endl;
+    cout << "    Purpose: Find all of the solution path of <code>" << endl;
+    cout << "    eg: ./engine --cal-solution-path 1A9BF0C00 demo.txt" << endl;
+    cout << endl;
+    cout << "  --cal-farthest-path <code> <file_name>" << endl;
+    cout << "    Purpose: Find all of the farthest path of <code>" << endl;
+    cout << "    eg: ./engine --cal-farthest-path 4FEA13400 demo.txt" << endl;
+    cout << endl;
     cout << "  --cal-target-path <code> <target_1> ... <target_n> <file_name>" << endl;
     cout << "    Purpose: Find all of the shortest path from <code> to <target_1>...<target_n>" << endl;
     cout << "    eg: ./engine --cal-target-path 1A9BF0C00 DAAF4CC00 AE2F2B400 demo.txt" << endl;
@@ -442,6 +514,10 @@ void show_help() {
     cout << "    Purpose: Find all elements of the group where <code> located" << endl;
     cout << "    eg: ./engine --group 4FEA13400" << endl;
     cout << "        ./engine --group 4FEA13400 demo.txt" << endl;
+    cout << endl;
+    cout << "  --group-path <code> <file_name>" << endl;
+    cout << "    Purpose: Find all of the path in the group where <code> located" << endl;
+    cout << "    eg: ./engine --group-path 1A9BF0C00 demo.txt" << endl;
     cout << endl;
     cout << "  --analy <code> [file_name]" << endl;
     cout << "    Purpose: Detailed analysis of the <code> " << endl;
@@ -520,17 +596,29 @@ int main(int argc, char* argv[]) {
         } else {
             parameter_err();
         }
+    } else if (parameter == "--cal-target") {
+        if (argc == 4) {
+            cal_target(argv[2], argv[3]);
+        } else if (argc == 5) {
+            cal_target(argv[2], argv[3], argv[4]);
+        } else {
+            parameter_err();
+        }
     } else if (parameter == "--cal-path") {
         if (argc == 4) {
             cal_path(argv[2], argv[3]);
         } else {
             parameter_err();
         }
-    } else if (parameter == "--cal-target") {
+    } else if (parameter == "--cal-solution-path") {
         if (argc == 4) {
-            cal_target(argv[2], argv[3]);
-        } else if (argc == 5) {
-            cal_target(argv[2], argv[3], argv[4]);
+            cal_solution_path(argv[2], argv[3]);
+        } else {
+            parameter_err();
+        }
+    } else if (parameter == "--cal-farthest-path") {
+        if (argc == 4) {
+            cal_farthest_path(argv[2], argv[3]);
         } else {
             parameter_err();
         }
@@ -549,6 +637,12 @@ int main(int argc, char* argv[]) {
             cal_group(argv[2]);
         } else if (argc == 4) {
             cal_group(argv[2], argv[3]);
+        } else {
+            parameter_err();
+        }
+    } else if (parameter == "--group-path") {
+        if (argc == 4) {
+            cal_group_path(argv[2], argv[3]);
         } else {
             parameter_err();
         }
