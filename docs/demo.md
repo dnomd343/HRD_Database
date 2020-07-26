@@ -220,6 +220,28 @@ int main() {
     cout << endl;
     cout << "---------------------------" << endl;
 
+    // 得到布局的连接结构
+    demo.quiet = true;
+    cout << "Get all path of 4FEA13400..." << endl;
+    demo.Analyse_Case(0x4FEA13400);
+    demo.Output_All_Path("demo-4FEA13400.txt");
+    cout << "Data save at demo-4FEA13400.txt" << endl;
+    cout << "---------------------------" << endl;
+
+    // 计算到达特定布局的所有路径
+    cout << "start: 4FEA13400" << endl;
+    vector <unsigned long long> dat;
+    dat.push_back(0x1BED0B400);
+    dat.push_back(0xD9B9F3000);
+    cout << "target:";
+    for (unsigned int i = 0; i < dat.size(); i++) {
+        cout << " " << demo.Change_str(dat[i]);
+    }
+    cout << endl;
+    demo.Output_Path(dat, "demo-4FEA13400-target.txt");
+    cout << "Data save at demo-4FEA13400-target.txt" << endl;
+    cout << "---------------------------" << endl;
+    
     return 0;
 }
 ```

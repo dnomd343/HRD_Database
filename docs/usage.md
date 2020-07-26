@@ -1,5 +1,15 @@
 ## 命令行参数
 
++ 输入的编码可省略后面的`0`
+> 'code' will automatically fill '0' to 9 bits
+
++ 使用`%`可自动生成文件名
+> use '%' to automatically generate 'file_name'
+```bash
+  eg: ./engine --cal 1A9BF0C00 %
+      File will save at '1A9BF0C00.txt'
+```
+
 + show命令：根据编码输出实际布局样式
 ```bash
 --show <code> [square_width]
@@ -24,12 +34,47 @@
         ./engine --cal-target 4FEA13400 43EA73400 demo.txt
 ```
 
++ cal-path命令：计算起始布局到最少步解的所有路径
+```bash
+  --cal-path <code> <file_name>
+    Purpose: Find all of the minimum step solution path of <code>
+    eg: ./engine --cal-path 4FEA13400 demo.txt
+```
+
++ cal-solution-path命令：计算起始布局到全部解的所有路径
+```bash
+  --cal-solution-path <code> <file_name>
+    Purpose: Find all of the solution path of <code>
+    eg: ./engine --cal-solution-path 1A9BF0C00 demo.txt
+```
+
++ cal-farthest-path命令：计算起始布局到最远布局的所有路径
+```bash
+  --cal-farthest-path <code> <file_name>
+    Purpose: Find all of the farthest path of <code>
+    eg: ./engine --cal-farthest-path 4FEA13400 demo.txt
+```
+
++ cal-target-path命令：计算起始布局到指定布局的所有路径
+```bash
+  --cal-target-path <code> <target_1> ... <target_n> <file_name>
+    Purpose: Find all of the shortest path from <code> to <target_1>...<target_n>
+    eg: ./engine --cal-target-path 1A9BF0C00 DAAF4CC00 AE2F2B400 demo.txt
+```
+
 + group命令：计算起始布局的所有衍生情况，即计算其所在群的全部元素
 ```bash
   --group <code> [file_name]
     Purpose: Find all elements of the group where <code> located
     eg: ./engine --group 4FEA13400
         ./engine --group 4FEA13400 demo.txt
+```
+
++ group-path命令：计算起始布局的所有衍生情况及全部可能的路径
+```bash
+  --group-path <code> <file_name>
+    Purpose: Find all of the path in the group where <code> located
+    eg: ./engine --group-path 1A9BF0C00 demo.txt
 ```
 
 + analy命令：分析布局的具体参数，包括层级结构，层间链接，解与最少步解，最远布局等
