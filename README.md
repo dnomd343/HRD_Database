@@ -1,4 +1,10 @@
-# 华容道数据库计划
+# HRD_Database Project
+
+[![build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/HRD_Database)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![language](https://img.shields.io/badge/language-c++-orange.svg)](./LICENSE)
+
+华容道数据库计划
 
 ## 项目简述
 
