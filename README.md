@@ -1,6 +1,6 @@
 # HRD_Database Project
 
-[![build](https://img.shields.io/badge/build-passing-brightgreen.svg)](./)
+[![build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dnomd343/HRD_Database/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![language](https://img.shields.io/badge/language-c++-orange.svg)](./src/engine/)
 
