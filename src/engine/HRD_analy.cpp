@@ -319,11 +319,11 @@ void HRD_analy::Analyse_Case(unsigned long long code) { // 分析输入编码的
         for (j = 0; j < Layer[i].size(); j++) {
             if ((Layer[i][j]->code >> 32) == 0xD) { // 2 * 2块在出口位置
                 min_solution_step = i; // 找到最少步数
-                j = Layer[i].size(); // 跳出两层循环
-                i = Layer.size();
+                goto get_min_solution_step; // 跳出两层循环
             }
         }
     }
+get_min_solution_step:;
     if (min_solution_step == -1) {return;} // 无解则退出
     for (i = 0; i < Layer[min_solution_step].size(); i++) { // 遍历最少步所在层
         if ((Layer[min_solution_step][i]->code >> 32) == 0xD) { // 判断是否为解
