@@ -1,6 +1,7 @@
 Attribute VB_Name = "Module_update"
 Option Explicit
-Private Declare Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" (ByVal pCaller As Long, ByVal szURL As String, ByVal szFileName As String, ByVal dwReserved As Long, ByVal lpfnCB As Long) As Long
+Public Declare Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" (ByVal pCaller As Long, ByVal szURL As String, ByVal szFileName As String, ByVal dwReserved As Long, ByVal lpfnCB As Long) As Long
+Public Declare Function DeleteUrlCacheEntry Lib "wininet" Alias "DeleteUrlCacheEntryA" (ByVal lpszUrlName As String) As Long
 Dim update_version As String
 Dim update_file_name As String
 Dim update_url As String
@@ -53,6 +54,7 @@ Public Sub Delete_file(file_name As String) ' 删除文件 自动规避错误
   End If
 End Sub
 Public Function Download_file(url As String, file_name As String) As Boolean ' 下载文件 成功返回true 错误返回false
+  Call DeleteUrlCacheEntry(url)
   If URLDownloadToFile(0, url, file_name, 0, 0) = 0 Then
     Download_file = True
   Else
